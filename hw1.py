@@ -29,15 +29,6 @@
 # Додайте перевірку вхідних даних для створення бібліотеки за допомогою Pydantic.
 # https://docs.pydantic.dev/latest/
 
-
-
-
-
-
-
-
-
-
 import datetime
 
 
@@ -53,6 +44,8 @@ class Book:
 
     def __str__(self):
         return self.__repr__()
+
+
 class Library():
     _instance = None
 
@@ -66,7 +59,7 @@ class Library():
 
     def add_book(self, book):
         try:
-            if isinstance(book,Book):
+            if isinstance(book, Book):
                 self.books.append(book)
             else:
                 raise TypeError('Обʼєкт не є екземпляром классу Book')
@@ -79,10 +72,10 @@ class Library():
                 self.books.remove(book)
                 break
 
-    def search_title(self,title):
+    def search_title(self, title):
         return [b for b in self.books if title.lower() in b.title.lower()]
 
-    def search_autor(self,autor):
+    def search_autor(self, autor):
         return [b for b in self.books if autor.lower() in b.autor.lower()]
 
     def __iter__(self):
@@ -97,9 +90,8 @@ class Library():
         raise StopIteration
 
     def books_sorted_title(self):
-        for book in sorted(self.books, key = lambda x: x.title):
+        for book in sorted(self.books, key=lambda x: x.title):
             yield book
-
 
     def __repr__(self):
         return f'Бібіліотека {self.name} має {len(self.books)} книжок'
@@ -111,11 +103,10 @@ class Library():
 library = Library('Залиманська бібліотека')
 
 book1 = Book('Чиста архітектура', 'Мартін Р.', '352', '2018')
-book2 = Book('Вивчаєм Python', 'Лутц М.','832','2023')
-book3 = Book('Python для програмування криптовалют ', 'Сонг Д.','370','2021')
-book4 = Book('Основи ШІ', 'Постолит А.','448','2021')
-book5 = Book('Чистий Python', 'Бейдер Д.','288','2018')
-
+book2 = Book('Вивчаєм Python', 'Лутц М.', '832', '2023')
+book3 = Book('Python для програмування криптовалют ', 'Сонг Д.', '370', '2021')
+book4 = Book('Основи ШІ', 'Постолит А.', '448', '2021')
+book5 = Book('Чистий Python', 'Бейдер Д.', '288', '2018')
 
 library.add_book(book1)
 library.add_book(book2)
@@ -133,4 +124,3 @@ for book in library:
 
 for book in library.books_sorted_title():
     print(book)
-
