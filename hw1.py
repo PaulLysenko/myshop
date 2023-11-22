@@ -39,68 +39,53 @@ class Library:
     date: the date the library object is created
     idx: iteration index for the books
     """
-    lib_name = input('Name your library: ')
+    lib_name = None
+    date = None
     _instance = None
 
-    def __init__(self):
+    def __init__(self, lib_name):
         self.books = []
+        self.lib_name = lib_name
         self.date = datetime.now()
-        self.current_idx = 0
 
-    def __new__(cls):
+    def __new__(cls, lib_name):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def add_book(self, book_title):
-        if isinstance(book_title, Book):
-            self.books.append(book_title)
-        return f'The "{book_title}" has been successfully added to your library!'
+    def add_book(self, book_instance):
+        if isinstance(book_instance, Book):
+            self.books.append(book_instance)
+        return f'The "{book_instance}" has been successfully added to your library!'
 
     def pop_book(self, book_title):
         for book in self.books:
             if book_title == book.book_name:
                 self.books.remove(book)
-                return f'The "{book_title}" has been successfully removed from your library!'
+                return f'"{book_title}" has been successfully removed from your library!'
         return f'It seems that you don\'t have "{book_title}" in your library! Perhaps try again?'
 
-    def search_by_name(self, book_title):
+    def search(self, book_data):
         book_lst = []
         for book in self.books:
-            if book_title.lower() in book.book_name.lower():
+            book_keys = book.author.lower().split(' ') + book.book_name.lower().split(' ')
+            if book_data.lower() in book_keys:
                 book_lst.append(book)
         return book_lst
 
-    def search_by_author(self, author_name):
-        book_lst = []
-        for book in self.books:
-            if author_name.lower() in book.author.lower():
-                book_lst.append(book)
-        return book_lst
-
-    def iter_books(self):
-        start_idx = getattr(self, 'current_idx', 0)
-        end_idx = 10
-        books = self.books[start_idx:end_idx]
-
-        self.current_idx = end_idx
-
-        return iter(books)
+    def iter_books(self, elements=10):
+        for i in range(0, len(self.books), elements):
+            yield self.books[i:i + elements]
 
     def __repr__(self):
         return f'Hi, I\'m a {self.lib_name}! Currently I have {len(self.books)} books.'
 
-    @staticmethod
-    def book_name_key(book):
-        x = book.book_name.lower()
-        return x
-
     def sorted_gen(self):
-        for book in sorted(self.books, key=self.book_name_key):
+        for book in sorted(self.books, key=lambda book: book.book_name.lower()):
             yield book
 
 
-lib = Library()
+lib = Library('library')
 
 book1 = Book('Kobzar', 'Taras Shevchenko', 350, 1840)
 book2 = Book('Beyond Good and Evil', 'Friedrich Nietzsche', 240, 1886)
@@ -120,8 +105,7 @@ next_books = lib.iter_books()
 for book_ in next_books:
     print(book_)
 
-print(lib.iter_books())
 print(lib.__repr__())
-print(lib.search_by_name('Beyond Good'))
-print(lib.search_by_author('George'))
+print(lib.search('evil'))
+print(lib.search('george'))
 print(lib.pop_book('Beyond Good and Evil'))
