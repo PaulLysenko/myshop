@@ -1,9 +1,36 @@
+# Напишіть функціонал “Бібліотеки” яка зберікає книжки.
+#
+# Обʼєкт класу “Бібліотека”:
+# Атрибути:
+# назва
+# дата створення (записується автоматично при створенні обʼєкта)
+# Може бути створено тільки один бʼєкт класу “Бібліотека” (реалізуйте Singleton).
+# Обʼєкт класу “Бібліотека” зберігає в собі тільки обʼєкти класу “Книжка”
+# Обʼєкт класу “Бібліотека” має метод для додавання книжки (add_book)
+# Обʼєкт класу “Бібліотека” має метод для видалення книжки по точному співпадінню назви (pop_book)
+# Обʼєкт класу “Бібліотека” має метод для пошуку книжки/книжок по назві (search_by_name) включаючи часткове співпадіння
+# Обʼєкт класу “Бібліотека” має метод для пошуку книжки/книжок по імені автора (search_by_author) включаючи часткове співпадіння
+# Обʼєкт класу “Бібліотека” повинен ітеруватись:
+# на кожній ітерації повинні вдаватись 10 книжок
+# додайте окремий метод, який повертає ітератор книжок в алфавітному порядку по назві (реалізуйте за допомогою генератора)
+# Обʼєкт класу “Бібліотеки” повинен репрезентуватися наступним чином - кількість книжок в бібліотеці
+# Обʼєкт класу “Книжка”:
+# Атрибути:
+# назва
+# автор
+# кількість сторінок
+# рік видання
+# Створіть бібліотеку, створіть декілька книжок. Додайте книжки в бібліотеку. Виконайте пошук по назві та по автору. Видаліть книжку з бібліотеки. Проітеруйтесь по бібліотеці, проітеруйтесь по бібліотеці в алфавітному порядку.
+#
+# * Додайте перевірку вхідних даних для створення книжки за допомогою Pydantic. Додайте перевірку вхідних даних для створення бібліотеки за допомогою Pydantic. https://docs.pydantic.dev/latest/
+
 from datetime import datetime
 from pydantic import BaseModel, ValidationError
 import threading
 
 
 class BookModel(BaseModel):
+    """Pydantic model for Book class."""
     title: str
     author: str
     sheets: int
@@ -11,12 +38,22 @@ class BookModel(BaseModel):
 
 
 class Book:
+    """Class representing a book."""
     title = None
     author = None
     sheets = None
     year = None
 
     def __init__(self, title: str, author: str, sheets: int, year: int):
+        """
+        Initializes a Book instance.
+
+        Parameters:
+            title (str): The title of the book.
+            author (str): The author of the book.
+            sheets (int): The number of sheets in the book.
+            year (int): The year of publication of the book.
+        """
         try:
             book_data = BookModel(title=title, author=author, sheets=sheets, year=year)
             self.title = book_data.title
@@ -28,10 +65,20 @@ class Book:
 
 
 class SingletonMeta(type):
+    """Metaclass for implementing the Singleton pattern."""
     _instances = {}
     _lock = threading.Lock()
 
     def __call__(cls, *args, **kwargs):
+        """
+        Call method for creating or returning a singleton instance.
+
+        Parameters:
+            cls: The class.
+
+        Returns:
+            An instance of the class.
+        """
         if cls not in cls._instances:
             instance = super().__call__(*args, **kwargs)
             cls._instances[cls] = instance
@@ -39,6 +86,7 @@ class SingletonMeta(type):
 
 
 class Library(metaclass=SingletonMeta):
+    """Class representing a library."""
     library_name = None
     date = None
     limit = 0
@@ -46,13 +94,26 @@ class Library(metaclass=SingletonMeta):
     book_list = []
 
     def __init__(self, lib_name: str):
+        """
+        Initializes a Library instance.
+
+        Parameters:
+            lib_name (str): The name of the library.
+        """
         self.library_name = lib_name
         self.date = datetime.now()
 
     def __iter__(self):
+        """Iterator method for the library."""
         return self
 
     def __next__(self):
+        """
+        Next method for the library iterator.
+
+        Returns:
+            List of books for the current iteration block.
+        """
         if self.current >= len(self.book_list):
             raise StopIteration
         books_for_iteration = self.book_list[self.current:self.current + 10]
@@ -60,6 +121,12 @@ class Library(metaclass=SingletonMeta):
         return books_for_iteration
 
     def add_book(self, book: Book):
+        """
+        Adds a book to the library.
+
+        Parameters:
+            book (Book): The book to be added to the library.
+        """
         if isinstance(book, Book):
             self.book_list.append(book)
             print(f'"{book.title}" by {book.author} was added to {self.library_name}')
@@ -67,6 +134,12 @@ class Library(metaclass=SingletonMeta):
             print(f'{book} isn\'t an object of a Book class')
 
     def pop_book(self, title: str):
+        """
+        Removes a book from the library.
+
+        Parameters:
+            title (str): The title of the book to be removed.
+        """
         found = False
         for book in self.book_list:
             if title.lower() == book.title.lower():
@@ -80,6 +153,15 @@ class Library(metaclass=SingletonMeta):
             print(f'There are no books to remove named "{title}"')
 
     def search_by_title(self, title: str):
+        """
+          Searches for books in the library by title.
+
+          Parameters:
+              title (str): The title to search for.
+
+          Returns:
+              List of dictionaries representing found books.
+        """
         found = []
         for book in self.book_list:
             if title.lower() == book.title.lower() or title.lower() in book.title.lower():
@@ -92,6 +174,15 @@ class Library(metaclass=SingletonMeta):
         return found
 
     def search_by_author(self, author: str):
+        """
+          Searches for books in the library by author.
+
+          Parameters:
+              author (str): The author to search for.
+
+          Returns:
+              List of dictionaries representing found books.
+        """
         found = []
         for book in self.book_list:
             if author.lower() == book.author.lower() or author.lower() in book.author.lower():
@@ -104,11 +195,23 @@ class Library(metaclass=SingletonMeta):
         return found
 
     def sorted_by_alphabet(self):
+        """
+         Generator for books in the library sorted alphabetically.
+
+         Yields:
+             The title of a book.
+         """
         sorted_books = sorted(self.book_list, key=lambda book: book.title.lower())
         for book in sorted_books:
             yield book.title
 
     def __repr__(self):
+        """
+            String representation of the library.
+
+            Returns:
+                A string representation of the library.
+        """
         return f'\tLibrary: {self.library_name}, Number of books: {len(self.book_list)}'
 
 
