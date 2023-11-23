@@ -83,14 +83,24 @@ class Library(metaclass=SingletonMeta):
         found = []
         for book in self.book_list:
             if title.lower() == book.title.lower() or title.lower() in book.title.lower():
-                found.append(book.title)
+                found.append({
+                    'title': book.title,
+                    'author': book.author,
+                    'sheets': book.sheets,
+                    'year': book.year
+                })
         return found
 
     def search_by_author(self, author: str):
         found = []
         for book in self.book_list:
             if author.lower() == book.author.lower() or author.lower() in book.author.lower():
-                found.append(book.title)
+                found.append({
+                    'title': book.title,
+                    'author': book.author,
+                    'sheets': book.sheets,
+                    'year': book.year
+                })
         return found
 
     def sorted_by_alphabet(self):
