@@ -16,7 +16,7 @@ class Book:
     sheets = None
     year = None
 
-    def __init__(self, title, author, sheets, year):
+    def __init__(self, title: str, author: str, sheets: int, year: int):
         try:
             book_data = BookModel(title=title, author=author, sheets=sheets, year=year)
             self.title = book_data.title
@@ -44,9 +44,8 @@ class Library(metaclass=SingletonMeta):
     limit = 0
     current = 0
     book_list = []
-    block_list = []
 
-    def __init__(self, lib_name):
+    def __init__(self, lib_name: str):
         self.library_name = lib_name
         self.date = datetime.now()
 
