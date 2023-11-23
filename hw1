@@ -1,136 +1,19 @@
-#Напишіть функціонал “Бібліотеки” яка зберікає книжки.
+"""
+Wheel command line tool (enable python -m wheel syntax)
+"""
 
-#Обʼєкт класу “Бібліотека”:
-#Атрибути:
-#назва
-#дата створення (записується автоматично при створенні обʼєкта)
-#Може бути створено тільки один бʼєкт класу “Бібліотека” (реалізуйте Singleton).
-#Обʼєкт класу “Бібліотека” зберігає в собі тільки обʼєкти класу “Книжка”
-#Обʼєкт класу “Бібліотека” має метод для додавання книжки (add_book)
-#Обʼєкт класу “Бібліотека” має метод для видалення книжки по точному співпадінню назви (pop_book)
-#Обʼєкт класу “Бібліотека” має метод для пошуку книжки/книжок по назві (search_by_name) включаючи часткове співпадіння
-#Обʼєкт класу “Бібліотека” має метод для пошуку книжки/книжок по імені автора (search_by_author) включаючи часткове співпадіння
-#Обʼєкт класу “Бібліотека” повинен ітеруватись:
-#на кожній ітерації повинні вдаватись 10 книжок
-#додайте окремий метод, який повертає ітератор книжок в алфавітному порядку по назві (реалізуйте за допомогою генератора)
-#Обʼєкт класу “Бібліотеки” повинен репрезентуватися наступним чином - кількість книжок в бібліотеці
-#Обʼєкт класу “Книжка”:
-#Атрибути:
-#назва
-#автор
-#кількість сторінок
-#рік видання
-#Створіть бібліотеку, створіть декілька книжок. Додайте книжки в бібліотеку. Виконайте пошук по назві та по автору. Видаліть книжку з бібліотеки. Проітеруйтесь по бібліотеці, проітеруйтесь по бібліотеці в алфавітному порядку.
-
-#* Додайте перевірку вхідних даних для створення книжки за допомогою Pydantic. Додайте перевірку вхідних даних для створення бібліотеки за допомогою Pydantic. https://docs.pydantic.dev/latest/
-from datetime import datetime
-from pydantic import BaseModel
+import sys
 
 
-def singleton(cls):
-    instances = {}
-
-    def get_instance(*args, **kwargs):
-        if cls not in instances:
-            instances[cls] = cls(*args, **kwargs)
-        return instances[cls]
-
-    return get_instance
-
-
-class Book(BaseModel):
-    Book_name: str or int = None
-    Author: str or int = None
-    Number_of_pages: int = None
-    Year_of_publication: int = None
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        self.Book_name = data.get('book_name')
-        self.Author = data.get('author')
-        self.Number_of_pages = data.get('number_of_pages')
-        self.Year_of_publication = data.get('year_of_publication')
+def main():  # needed for console script
+    if __package__ == '':
+        # To be able to run 'python wheel-0.9.whl/wheel':
+        import os.path
+        path = os.path.dirname(os.path.dirname(__file__))
+        sys.path[0:0] = [path]
+    import wheel.cli
+    sys.exit(wheel.cli.main())
 
 
-@singleton
-class Library:
-    Library_name = None
-    date_of_creation = None
-
-    def __init__(self, library_name):
-        self.Library_name = library_name
-        self.date_of_creation = datetime.now()
-        self.books = []
-
-    def add_book(self, book):
-        if isinstance(book, Book):
-            self.books.append(book)
-            print(f'Book "{book.Book_name}" add to library')
-        else:
-            print('Add object of Book class')
-
-    def pop_book(self, book_name):
-        for book in self.books:
-            if book_name == book:
-                self.books.remove(book)
-                print(f'{book} have been delite')
-            else:
-                print(f'there is no {book} in the library')
-
-    def search_by_name(self, partial_name):
-        found_books = [book for book in self.books if partial_name.lower()]
-        if found_books:
-            for book in found_books:
-                print(f'Found books with partial name book "{partial_name}":\n-{book.Book_name} ({book.Author})')
-        else:
-            print(f'No books with partial title match "{partial_name}" were found')
-
-    def search_by_author(self, partial_name):
-        found_books = [book for book in self.books if partial_name.lower()]
-        if found_books:
-            for book in found_books:
-                print(f'Found books with partial name author "{partial_name}":\n-{book.Author} ({book.Book_name})')
-        else:
-            print(f'No authors with partial title match "{partial_name}" were found')
-
-    def generator_by_blocks(self, block_size):
-        for i in range(0, len(self.books), block_size):
-            yield self.books[i:i + block_size]
-
-    def iterate_books(self, block_size=10):
-        book_blocks = self.generator_by_blocks(block_size)
-        for block in book_blocks:
-            yield block
-
-    def get_iterator_by_title(self):
-        sorted_books = sorted(self.books, key=lambda book: book.Book_name.lower())
-        for book in sorted_books:
-            yield book
-
-    def __repr__(self):
-        return f"Number of books in the library-{len(self.books)}"
-
-
-my_library = Library(library_name='MyLibrary')
-
-book1 = Book(book_name="The Great Gatsby", author="F. Scott Fitzgerald", number_of_pages=180, year_of_publication=1925)
-book2 = Book(book_name="To Kill a Mockingbird", author="Harper Lee", number_of_pages=281, year_of_publication=1960)
-book3 = Book(book_name="1984", author="George Orwell", number_of_pages=328, year_of_publication=1949)
-
-my_library.add_book(book1)
-my_library.add_book(book2)
-my_library.add_book(book3)
-
-my_library.search_by_name("Great")
-my_library.search_by_author("harper")
-
-my_library.pop_book("The Great Gatsby")
-
-print("Iterating through the library:")
-for block in my_library.iterate_books():
-    for book in block:
-        print(book)
-
-print("Iterating through the library in alphabetical order:")
-for book in my_library.get_iterator_by_title():
-    print(book)
+if __name__ == "__main__":
+    sys.exit(main())
