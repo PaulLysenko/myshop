@@ -53,22 +53,22 @@ class Library:
             cls.date = datetime.datetime.now()
         return cls._instance
 
-    def add_book(self, book):
+    def add_book(self, book: object):
         if book not in self.books:
             self.books.append(book)
         else:
             print(f'Book {book.book_name} is already added to the library')
 
-    def pop_book(self, book_name):
+    def pop_book(self, book_name: str):
         for book in self.books:
             if book.book_name == book_name:
                 self.books.remove(book)
                 break
 
-    def search_by_name(self, book_name):
+    def search_by_name(self, book_name: str):
         return [i for i in self.books if book_name.lower() in i.book_name.lower()]
 
-    def search_by_author(self, book_author):
+    def search_by_author(self, book_author: str):
         return [i for i in self.books if book_author.lower() in i.book_author.lower()]
 
     def __iter__(self):
