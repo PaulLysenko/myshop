@@ -1,29 +1,3 @@
-# Напишіть функціонал “Бібліотеки” яка зберікає книжки.
-#
-# Обʼєкт класу “Бібліотека”:
-# Атрибути:
-# назва
-# дата створення (записується автоматично при створенні обʼєкта)
-# Може бути створено тільки один бʼєкт класу “Бібліотека” (реалізуйте Singleton).
-# Обʼєкт класу “Бібліотека” зберігає в собі тільки обʼєкти класу “Книжка”
-# Обʼєкт класу “Бібліотека” має метод для додавання книжки (add_book)
-# Обʼєкт класу “Бібліотека” має метод для видалення книжки по точному співпадінню назви (pop_book)
-# Обʼєкт класу “Бібліотека” має метод для пошуку книжки/книжок по назві (search_by_name) включаючи часткове співпадіння
-# Обʼєкт класу “Бібліотека” має метод для пошуку книжки/книжок по імені автора (search_by_author) включаючи часткове співпадіння
-# Обʼєкт класу “Бібліотека” повинен ітеруватись:
-# на кожній ітерації повинні вдаватись 10 книжок
-# додайте окремий метод, який повертає ітератор книжок в алфавітному порядку по назві (реалізуйте за допомогою генератора)
-# Обʼєкт класу “Бібліотеки” повинен репрезентуватися наступним чином - кількість книжок в бібліотеці
-# Обʼєкт класу “Книжка”:
-# Атрибути:
-# назва
-# автор
-# кількість сторінок
-# рік видання
-# Створіть бібліотеку, створіть декілька книжок. Додайте книжки в бібліотеку. Виконайте пошук по назві та по автору. Видаліть книжку з бібліотеки. Проітеруйтесь по бібліотеці, проітеруйтесь по бібліотеці в алфавітному порядку.
-#
-# * Додайте перевірку вхідних даних для створення книжки за допомогою Pydantic. Додайте перевірку вхідних даних для створення бібліотеки за допомогою Pydantic. https://docs.pydantic.dev/latest/
-
 from datetime import datetime
 from pydantic import BaseModel, ValidationError
 import threading
@@ -70,6 +44,7 @@ class Library(metaclass=SingletonMeta):
     limit = 0
     current = 0
     book_list = []
+    block_list = []
 
     def __init__(self, lib_name):
         self.library_name = lib_name
@@ -79,22 +54,20 @@ class Library(metaclass=SingletonMeta):
         return self
 
     def __next__(self):
-        self.limit += 1
-        self.current = self.limit
-        if self.limit >= 11:
+        if self.current >= len(self.book_list):
             raise StopIteration
-        else:
-            return f'{self.book_list[self.current - 1].title} by {self.book_list[self.current - 1].author} {self.book_list[self.current - 1].year}'
-        # return self.book_list[self.current - 1].title
+        books_for_iteration = self.book_list[self.current:self.current + 10]
+        self.current += 10
+        return books_for_iteration
 
-    def add_book(self, book):
+    def add_book(self, book: Book):
         if isinstance(book, Book):
             self.book_list.append(book)
             print(f'"{book.title}" by {book.author} was added to {self.library_name}')
         else:
             print(f'{book} isn\'t an object of a Book class')
 
-    def pop_book(self, title):
+    def pop_book(self, title: str):
         found = False
         for book in self.book_list:
             if title.lower() == book.title.lower():
@@ -107,23 +80,19 @@ class Library(metaclass=SingletonMeta):
         if not found:
             print(f'There are no books to remove named "{title}"')
 
-    def search_by_title(self, title):
-        found = False
+    def search_by_title(self, title: str):
+        found = []
         for book in self.book_list:
             if title.lower() == book.title.lower() or title.lower() in book.title.lower():
-                print(f'\tHere we go "{book.title}" by {book.author}')
-                found = True
-        if not found:
-            print(f'Unfortunately there is no "{title}" in {self.library_name}')
+                found.append(book.title)
+        return found
 
-    def search_by_author(self, author):
-        found = False
+    def search_by_author(self, author: str):
+        found = []
         for book in self.book_list:
             if author.lower() == book.author.lower() or author.lower() in book.author.lower():
-                print(f'\tBook by {book.author}: "{book.title}"')
-                found = True
-        if not found:
-            print(f'There are no books in {self.library_name} written by {author}')
+                found.append(book.title)
+        return found
 
     def sorted_by_alphabet(self):
         sorted_books = sorted(self.book_list, key=lambda book: book.title.lower())
@@ -154,14 +123,17 @@ lib = Library('My_Library')
 for book in books:
     lib.add_book(book)
 print('\nStart of iteration:')
-for book in lib:
-    print(book)
+for book_block in lib:
+    # print(book_block)
+    for book in book_block:
+        print(f'"{book.title}" by {book.author} {book.year}')
 print('End of iteration.\n')
 print('\nIn alphabet order: ')
 for book in lib.sorted_by_alphabet():
     print(book)
 print('End of alphabet order.\n')
-lib.search_by_author('Tolkien')
-lib.search_by_title('hunger games')
+print(lib.search_by_author('Tolkien'))
+print(lib.search_by_title('1984'))
 lib.pop_book('The Great Gatsby')
 print(lib)
+
