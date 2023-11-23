@@ -58,13 +58,11 @@ class Library():
         return cls._instance
 
     def add_book(self, book):
-        try:
             if isinstance(book, Book):
                 self.books.append(book)
             else:
                 raise TypeError('Обʼєкт не є екземпляром классу Book')
-        except TypeError as e:
-            print(f'помилка при додаванні книги {e}')
+
 
     def pop_book(self, title):
         for book in self.books:
