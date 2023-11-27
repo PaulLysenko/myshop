@@ -7,6 +7,14 @@
 
 </head>
 <body>
-  <h1 style="font-style: italic">Hello fom products template</h1>
+    <h1 style="font-style: italic">Hello fom products template view 1</h1>
+
+    <ul>
+        {% for product in products %}
+            <li>
+                {{product.price}}: {{product.name}}
+            </li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
