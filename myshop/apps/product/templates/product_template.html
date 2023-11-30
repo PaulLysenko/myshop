@@ -7,8 +7,12 @@
 
 </head>
 <body>
-    <h1 style="font-style: italic">Hello fom products template view 1</h1>
-
+    <h1 style="font-style: italic">Products:</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="search" placeholder="Enter text here ...">
+        <input type="submit" value="Search">
+    </form>
     <ul>
         {% for product in products %}
             <li>
