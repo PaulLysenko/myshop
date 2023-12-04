@@ -1,0 +1,26 @@
+{% extends "base_layout.html" %}
+
+{% block body %}
+<h1 style="font-style: italic">Products:</h1>
+<div class="input-group">
+    <form method="post" class="search-label-icon w-100">
+        {% csrf_token %}
+        <div class="form-outline" data-mdb-input-init>
+            {{ form }}
+        </div>
+        <input class="btn btn-primary" type="submit" value="Search">
+    </form>
+</div>
+<div class="mt-5">
+    <ul>
+        {% for product in products %}
+            <li>
+                <a target="_blank" href="{% url 'product' product.id %}">{{product.price}}: {{product.name}}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+</div>
+
+
+{% endblock %}

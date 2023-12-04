@@ -1,17 +1,36 @@
-from django.db.models import Q
 from decimal import Decimal
+
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import render
+from django.views import View
+
 from apps.product.models import Product
+from apps.product.forms import SearchForm
 
 
-def products_all(request, *args, **kwargs):
+class ProductsView(View):
+    template_name = 'products.html'
 
-    products = Product.objects.all()
+    def get(self, request):
+        form = SearchForm()
 
-    if request.method == 'POST':
+        products = Product.objects.all()
 
-        search_value = request.POST['search'].strip()
+        context = {
+            'products': products,
+            'form': form,
+        }
+        response = render(request, self.template_name, context=context)
+        return response
+
+    def post(self, request):
+
+        products = Product.objects.all()
+        form = SearchForm(request.POST)
+
+        form.is_valid()
+        search_value = form.cleaned_data['search']
 
         if search_value:
             query = Q(name=search_value) | Q(description__icontains=search_value)
@@ -25,16 +44,18 @@ def products_all(request, *args, **kwargs):
             products = products.filter(
                 query,
             )
+        context = {
+            'products': products,
+            'form': form,
+        }
+        response = render(request, self.template_name, context=context)
 
-    response = render(request, 'product_template.html', context={'products': products})
-
-    return response
+        return response
 
 
 def product_by_id(request, product_id=None, *args, **kwargs):
 
-    products = Product.objects.filter(id=product_id)
-    if not products:
+    if not (products := Product.objects.filter(id=product_id)):
         raise Http404("Product does not exist")
 
-    return render(request, 'product_template_single_product.html', context={'product': products.last()})
+    return render(request, 'product.html', context={'product': products.last()})
