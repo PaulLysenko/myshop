@@ -15,7 +15,7 @@
     <ul>
         {% for brand in brands %}
             <li>
-                <a target="_blank" href="{% url 'brand' brand.id %}">{{brand.brand_name}}</a>
+                <a target="_blank" href="{% url 'brand' brand.id %}">{{brand.name}}</a>
             </li>
         {% endfor %}
     </ul>

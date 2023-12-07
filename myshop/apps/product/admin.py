@@ -9,7 +9,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     def brand_name(self, obj):
         if obj.brand:
-            return obj.brand.brand_name
+            return obj.brand.name
         else:
             return ''
 

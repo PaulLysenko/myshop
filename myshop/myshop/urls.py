@@ -23,5 +23,4 @@ from apps.product.urls import urlpatterns as product_urlpatterns
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('product/', include(product_urlpatterns)),
-    path('brand/', include(product_urlpatterns))
 ]

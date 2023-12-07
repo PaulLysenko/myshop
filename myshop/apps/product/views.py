@@ -54,7 +54,6 @@ class ProductsView(View):
 
 
 def product_by_id(request, product_id=None, *args, **kwargs):
-    print('in product_by_id')
 
     if not (products := Product.objects.filter(id=product_id)):
         raise Http404("Product does not exist")
@@ -86,8 +85,8 @@ class BrandView(View):
         search_value = form.cleaned_data['search']
 
         if search_value:
-            query = (Q(brand_name__icontains=search_value) | Q(brand_description__icontains=search_value)
-                     | Q(brand_origin_country__icontains=search_value))
+            query = (Q(name__icontains=search_value) | Q(description__icontains=search_value)
+                     | Q(country_of_origin__icontains=search_value))
             brands = brands.filter(
                 query,
             )

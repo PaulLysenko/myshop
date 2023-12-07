@@ -3,12 +3,12 @@ from django.db import models
 
 class ProductBrand(models.Model):
 
-    brand_name = models.CharField(max_length=100)
-    brand_origin_country = models.CharField(max_length=50)
-    brand_description = models.TextField(null=True, blank=True)
+    name = models.CharField(max_length=100)
+    country_of_origin = models.CharField(max_length=50)
+    description = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return self.brand_name
+        return self.name
 
 
 class Product(models.Model):
@@ -21,6 +21,3 @@ class Product(models.Model):
 
     def __str__(self):
         return f'{self.name}: {self.price}'
-
-    class Meta:
-        ordering = ['name']
