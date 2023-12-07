@@ -11,11 +11,23 @@ from apps.product.forms import SearchForm
 
 class ProductsView(View):
     template_name = 'products.html'
+    template_name2 = 'product.html'
 
-    def get(self, request):
+    def get(self, request, product_id=None, *args, **kwargs):
         form = SearchForm()
 
         products = Product.objects.all()
+
+        if product_id:
+            try:
+                product = Product.objects.get(id=product_id)
+                context = {
+                    'product': product,
+                    'form': form
+                }
+                return render(request, self.template_name2, context=context)
+            except:
+                raise Http404('Brand does not exist')
 
         context = {
             'products': products,
@@ -53,21 +65,25 @@ class ProductsView(View):
         return response
 
 
-def product_by_id(request, product_id=None, *args, **kwargs):
-
-    if not (products := Product.objects.filter(id=product_id)):
-        raise Http404("Product does not exist")
-
-    return render(request, 'product.html', context={'product': products.last()})
-
-
 class BrandView(View):
     template_name = 'product_brands.html'
+    template_name2 = 'product_brand.html'
 
-    def get(self, request):
+    def get(self, request, brand_id=None, *args, **kwargs):
         form = SearchForm()
 
         brands = ProductBrand.objects.all()
+
+        if brand_id:
+            try:
+                brand = ProductBrand.objects.get(id=brand_id)
+                context = {
+                    'brand': brand,
+                    'form': form
+                }
+                return render(request, self.template_name2, context=context)
+            except:
+                raise Http404('Brand does not exist')
 
         context = {
             'brands': brands,
@@ -90,6 +106,7 @@ class BrandView(View):
             brands = brands.filter(
                 query,
             )
+
         context = {
             'brands': brands,
             'form': form,
@@ -97,11 +114,3 @@ class BrandView(View):
         response = render(request, self.template_name, context=context)
 
         return response
-
-
-def brand_by_id(request, brand_id=None, *args, **kwargs):
-
-    if not (brands := ProductBrand.objects.filter(id=brand_id)):
-        raise Http404('Brand does not exist')
-
-    return render(request, 'product_brand.html', context={'brand': brands.last()})
