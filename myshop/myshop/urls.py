@@ -18,9 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 
 from apps.product.urls import urlpatterns as product_urlpatterns
+from apps.brand.urls import urlpatterns as brand_urlpatterns
+
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('product/', include(product_urlpatterns)),
+    path('brand/', include(brand_urlpatterns))
 ]

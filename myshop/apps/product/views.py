@@ -53,6 +53,7 @@ class ProductsView(View):
         return response
 
 
+
 def product_by_id(request, product_id=None, *args, **kwargs):
 
     if not (products := Product.objects.filter(id=product_id)):
