@@ -25,7 +25,6 @@ class BrandView(View):
         return response
 
     def post(self, request):
-
         brands = Brand.objects.all()
         form = SearchForm(request.POST)
 
@@ -35,8 +34,6 @@ class BrandView(View):
         if search_value:
             query = (Q(name_brand=search_value) | Q(description_brand__icontains=search_value)
                      | Q(country_brand=search_value))
-
-
             brands = brands.filter(
                 query,
             )
@@ -49,14 +46,13 @@ class BrandView(View):
         return response
 
 
+class BrandByIdView(View):
+    template_name = 'brand.html'
 
-def brand_by_id(request, brand_id=None, *args, **kwargs):
-    if not (brands := Brand.objects.filter(id=brand_id)):
-        raise Http404("Brand does not exist")
+    def get(self, request, brand_id=None, *args, **kwargs):
+        try:
+            brand = Brand.objects.get(id=brand_id)
+        except Brand.DoesNotExist:
+            raise Http404("Brand does not exist")
 
-    return render(request, 'brand.html', context={'brand': brands.last()})
-
-
-
-
-# Create your views here.
+        return render(request, self.template_name, context={'brand': brand})

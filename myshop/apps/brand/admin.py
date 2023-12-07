@@ -2,9 +2,8 @@ from django.contrib import admin
 from apps.brand.models import Brand
 
 
-
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ['name_brand', 'country_brand', 'description_brand']
+    list_display = ['name', 'country', 'description']
 
 
 admin.site.register(Brand, BrandAdmin)
