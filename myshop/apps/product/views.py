@@ -59,3 +59,5 @@ def product_by_id(request, product_id=None, *args, **kwargs):
         raise Http404("Product does not exist")
 
     return render(request, 'product.html', context={'product': products.last()})
+
+
