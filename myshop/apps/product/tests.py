@@ -1,9 +1,9 @@
-from django.test import TestCase, Client
+from django.test import TransactionTestCase, Client
 from django.urls import reverse
 from apps.product.models import Product
 
 
-class SmokeTestProducts(TestCase):
+class SmokeTestProducts(TransactionTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -22,10 +22,12 @@ class SmokeTestProducts(TestCase):
         result = self.client.post(url, data={'search': 'abcd'})
         self.assertEqual(result.status_code, 200)
 
-    def test_get_product_no_products(self):
-        url = reverse('product', args=(1, ))
-        result = self.client.post(url, data={'search': 'abcd'})
-        self.assertEqual(result.status_code, 404)
+
+class SmokeTestProduct(TransactionTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.client = Client()
 
     def test_get_product_existing_product(self):
         product = Product.objects.create(
@@ -36,9 +38,7 @@ class SmokeTestProducts(TestCase):
         result = self.client.post(url, data={'search': 'abcd'})
         self.assertEqual(result.status_code, 200)
 
-    @classmethod
-    def tearDownClass(cls):
-        pass
-
-    def tearDown(self):
-        pass
+    def test_get_product_no_products(self):
+        url = reverse('product', args=(1, ))
+        result = self.client.post(url, data={'search': 'abcd'})
+        self.assertEqual(result.status_code, 404)
