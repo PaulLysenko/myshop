@@ -90,7 +90,6 @@ class BrandsView(View):
         search_value = form.cleaned_data['search']
 
         if search_value:
-            # query = Q(name__icontains=search_value)
             query = Q(name=search_value) | Q(description__icontains=search_value)
             brands = brands.filter(query)
 
