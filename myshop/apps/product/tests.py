@@ -1,8 +1,9 @@
-from django.test import TestCase, Client
+from django.test import TransactionTestCase, Client
 from django.urls import reverse
+from apps.product.models import Product
 
 
-class SmokeTest(TestCase):
+class SmokeTestProducts(TransactionTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -13,25 +14,31 @@ class SmokeTest(TestCase):
 
     def test_get_products(self):
         url = reverse('products')
-        print(f'--url >> {url}')
         result = self.client.get(url)
         self.assertEqual(result.status_code, 200)
 
-        def test_post_products(self):
-            url = reverse('products')
-            print(f'--url >> {url}')
-            result = self.client.post(url, data={'search': 'abcd'})
-            self.assertEqual(result.status_code, 200)
+    def test_post_products(self):
+        url = reverse('products')
+        result = self.client.post(url, data={'search': 'abcd'})
+        self.assertEqual(result.status_code, 200)
 
-        def test_get_product_no_product(self):
-            url = reverse('product', args=(1,))
-            print(f'--url >> {url}')
-            result = self.client.post(url, data={'search': 'abcd'})
-            self.assertEqual(result.status_code, 404)
+
+class SmokeTestProduct(TransactionTestCase):
 
     @classmethod
-    def tearDownClass(cls):
-        pass
+    def setUpClass(cls):
+        cls.client = Client()
 
-    def tearDown(self):
-        pass
+    def test_get_product_existing_product(self):
+        product = Product.objects.create(
+            name='abcd',
+            price=1,
+        )
+        url = reverse('product', args=(product.id, ))
+        result = self.client.post(url, data={'search': 'abcd'})
+        self.assertEqual(result.status_code, 200)
+
+    def test_get_product_no_products(self):
+        url = reverse('product', args=(1, ))
+        result = self.client.post(url, data={'search': 'abcd'})
+        self.assertEqual(result.status_code, 404)
