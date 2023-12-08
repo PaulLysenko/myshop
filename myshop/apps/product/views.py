@@ -7,6 +7,11 @@ from django.views import View
 
 from apps.product.models import Product
 from apps.product.forms import SearchForm
+from apps.product.models import Brand
+
+
+def home(request):
+    return render(request, 'base_layout.html')
 
 
 class ProductsView(View):
@@ -59,3 +64,50 @@ def product_by_id(request, product_id=None, *args, **kwargs):
         raise Http404("Product does not exist")
 
     return render(request, 'product.html', context={'product': products.last()})
+
+
+class BrandView(View):
+    template_name = 'brands.html'
+
+    def get(self, request):
+        form = SearchForm()
+        brands = Brand.objects.all()
+
+        context = {
+            'brands': brands,
+            'form': form,
+        }
+        return render(request, self.template_name, context=context)
+
+    def post(self, request):
+        form = SearchForm(request.POST)
+        brands = Brand.objects.all()
+
+        form.is_valid()
+        search_value = form.cleaned_data['search']
+
+        if search_value:
+            query = Q(name=search_value) | Q(description__icontains=search_value)
+            brands = brands.filter(query)
+
+        context = {
+            'brands': brands,
+            'form': form,
+        }
+        return render(request, self.template_name, context=context)
+
+
+class BrandByIdView(View):
+    template_name = 'brand.html'
+
+    def get(self, request, brand_id=None, *args, **kwargs):
+        try:
+            brand = Brand.objects.get(id=brand_id)
+        except Brand.DoesNotExist:
+            raise Http404("Brand does not exist")
+
+        context = {'brand': brand}
+        return render(request, self.template_name, context=context)
+
+
+
