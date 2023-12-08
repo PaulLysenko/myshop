@@ -6,14 +6,16 @@ from django.shortcuts import render
 from django.views import View
 from django.views.generic import ListView
 from django.views.generic import DetailView
+from django.views.generic import TemplateView
+from django.shortcuts import get_object_or_404
 
 from apps.product.models import Product
 from apps.product.forms import SearchForm
 from apps.product.models import Brand
 
 
-def home(request):
-    return render(request, 'base_layout.html')
+class HomeView(TemplateView):
+    template_name = 'base_layout.html'
 
 
 class ProductsView(View):
@@ -103,10 +105,7 @@ class BrandDetailView(View):
     template_name = 'brand.html'
 
     def get(self, request, brand_id=None, *args, **kwargs):
-        try:
-            brand = Brand.objects.get(id=brand_id)
-        except Brand.DoesNotExist:
-            raise Http404("Brand does not exist")
+        brand = get_object_or_404(Brand, id=brand_id)
 
         context = {'brand': brand}
         return render(request, self.template_name, context=context)

@@ -22,8 +22,8 @@ from apps.product.urls import urlpatterns as brand_urlpatterns
 from apps.product import views
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.HomeView.as_view(), name='home'),
     path('admin/', admin.site.urls),
-    path('product/', include(product_urlpatterns)),
-    path('brand/', include(brand_urlpatterns)),
+    path('products/', include('apps.product.urls')),
+    path('brands/', include('apps.product.urls')),
 ]
