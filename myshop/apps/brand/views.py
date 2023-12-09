@@ -10,10 +10,17 @@ from apps.product.forms import SearchForm
 class BrandView(View):
     template_name = 'brands.html'
 
-    def get(self, request):
+    def get(self, request, brand_id=None, *args, **kwargs):
         form = SearchForm()
 
         brands = Brand.objects.all()
+        if brand_id:
+            try:
+                Brand.objects.get(id=brand_id)
+                return render(request, 'brand.html', context={'brand': brands.last()})
+
+            except Exception:
+                raise Http404('Brand does not exist')
 
         context = {
             'brands': brands,
@@ -42,10 +49,3 @@ class BrandView(View):
         }
 
         return render(request, self.template_name, context=context)
-
-
-def brand_by_id(request, brand_id=None, *args, **kwargs):
-    if not (brands := Brand.objects.filter(id=brand_id)):
-        raise Http404('Brand does not exist')
-
-    return render(request, 'brand.html', context={'brand': brands.last()})

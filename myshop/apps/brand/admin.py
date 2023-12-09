@@ -3,7 +3,7 @@ from apps.product.models import Brand
 
 
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ['brand_name', 'brand_country', 'brand_description']
+    list_display = ['name', 'country', 'description']
 
 
 admin.site.register(Brand, BrandAdmin)
