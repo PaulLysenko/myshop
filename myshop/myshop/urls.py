@@ -17,6 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 from apps.product import views
 from apps.product.urls import urlpatterns as product_urlpatterns
 from apps.product.urls import urlpatterns as brand_urlpatterns
@@ -25,6 +28,6 @@ from apps.product.urls import urlpatterns as brand_urlpatterns
 urlpatterns = [
     path('', views.home, name='home'),
     path('admin/', admin.site.urls),
-    path('product/', include(product_urlpatterns)),
-    path('brand/', include(brand_urlpatterns)),
-]
+    path('product/', include(product_urlpatterns), name='products'),
+    path('brand/', include(brand_urlpatterns), name='brand'),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

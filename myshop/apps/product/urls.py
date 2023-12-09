@@ -1,4 +1,5 @@
 from django.urls import re_path
+from django.urls import path
 from apps.product.views import product_by_id as product_pk_view
 from apps.product.views import ProductsView
 from apps.product.views import BrandView
