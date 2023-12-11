@@ -1,7 +1,7 @@
 {% extends "base_layout.html" %}
 
 {% block body %}
-<h1 style="font-style: italic">Products:</h1>
+<h1 style="font-style: italic">Brands:</h1>
 <div class="input-group">
     <form method="post" class="search-label-icon w-100">
         {% csrf_token %}
@@ -13,9 +13,9 @@
 </div>
 <div class="mt-5">
     <ul>
-        {% for product in products %}
+        {% for brand in brands %}
             <li>
-                <a target="_blank" href="{% url 'product' product.id %}">{{product.price}} : {{product.name}}</a>
+                <a target="_blank" href="{% url 'brand' brand.name %}">{{brand.name}}</a>
             </li>
         {% endfor %}
     </ul>
