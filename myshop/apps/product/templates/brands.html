@@ -1,9 +1,9 @@
 {% extends "base_layout.html" %}
 
 {% block body %}
-<h1 style="font-style: italic">Products:</h1>
+<h1 style="font-style: italic">Brands:</h1>
 <div class="input-group">
-    <form method="post" class="search-label-icon w-100">
+    <form method="get" class="search-label-icon w-100">
         {% csrf_token %}
         <div class="form-outline" data-mdb-input-init>
             {{ form }}
@@ -13,13 +13,12 @@
 </div>
 <div class="mt-5">
     <ul>
-        {% for product in products %}
+        {% for brand in brands %}
         <li>
-            <a target="_blank" href="{% url 'product' product.id %}">{{product.price}}: {{product.name}}</a>
+            <a target="_blank" href="{% url 'brand' brand.id %}">{{ brand.name }} - {{ brand.country }}</a>
         </li>
         {% endfor %}
     </ul>
-
 </div>
 
 
