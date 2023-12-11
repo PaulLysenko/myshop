@@ -10,18 +10,32 @@ from apps.product.forms import SearchFormProduct, SearchFormBrand
 
 
 class BrandsView(View):
-    template_name = 'brands.html'
+    template_brands = 'brands.html'
+    template_brand = 'brand.html'
 
-    def get(self, request):
+    def get(self, request, brand_name=None, *args, **kwargs):
 
         brands = Brand.objects.all()
         form = SearchFormBrand(request.GET)
+
+        if brand_name:
+            try:
+                brand = brands.filter(name__icontains=brand_name)
+                if brand:
+                    context = {
+                        'brand': brand.last()
+                    }
+                    return render(request, self.template_brand, context=context)
+                else:
+                    raise Http404("Product does not exist")
+            except Exception:
+                raise Http404("Product does not exist")
 
         context = {
             'brands': brands,
             'form': form,
         }
-        response = render(request, self.template_name, context=context)
+        response = render(request, self.template_brands, context=context)
         return response
 
     def post(self, request):
@@ -39,31 +53,37 @@ class BrandsView(View):
                 'brands': brands,
                 'form': form,
             }
-            response = render(request, self.template_name, context=context)
+            response = render(request, self.template_brands, context=context)
             return response
-
-    @staticmethod
-    def brand_by_name(request, brand_name=None, *args, **kwargs):
-        if not (brands := Brand.objects.filter(name=brand_name)):
-            raise Http404("Product does not exist")
-
-        return render(request, 'brand.html', context={'brand': brands.last()})
-
 
 
 class ProductsView(View):
-    template_name = 'products.html'
+    template_products = 'products.html'
+    template_product = 'product.html'
 
-    def get(self, request):
+    def get(self, request, product_id=None, *args, **kwargs):
 
         products = Product.objects.all()
         form = SearchFormProduct()
+
+        if product_id:
+            try:
+                products = Product.objects.filter(id=product_id)
+                if products:
+                    context = {
+                        'product': products.last()
+                    }
+                    return render(request, self.template_product, context=context)
+                else:
+                    raise Http404("Product does not exist")
+            except Exception:
+                raise Http404("Product does not exist")
 
         context = {
             'products': products,
             'form': form,
         }
-        response = render(request, self.template_name, context=context)
+        response = render(request, self.template_products, context=context)
         return response
 
     def post(self, request):
@@ -90,14 +110,6 @@ class ProductsView(View):
             'products': products,
             'form': form,
         }
-        response = render(request, self.template_name, context=context)
+        response = render(request, self.template_products, context=context)
 
         return response
-
-    @staticmethod
-    def product_by_id(request, product_id=None, *args, **kwargs):
-
-        if not (products := Product.objects.filter(id=product_id)):
-            raise Http404("Product does not exist")
-
-        return render(request, 'product.html', context={'product': products.last()})
