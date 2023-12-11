@@ -15,7 +15,7 @@
     <ul>
         {% for product in products %}
         <li>
-            <a target="_blank" href="{% url 'product' product.id %}">{{product.price}}: {{product.name}}</a>
+            <a target="_blank" href="{% url 'product' product.id %}">{{product.price}}: {{product.name}} -> {{product.brand.name}}</a>
         </li>
         {% endfor %}
     </ul>

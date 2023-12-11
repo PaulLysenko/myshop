@@ -1,0 +1,14 @@
+{% extends "base_layout.html" %}
+
+{% block body %}
+  <h1 class="text-center" style="font-style: italic">Create an account</h1>
+  <div class="input-group">
+    <form method="post" action="{% url 'validate_registration' otc %}">
+      {% csrf_token %}
+      <div class="form-outline" data-mdb-input-init>
+        {{ form }}
+      </div>
+      <input class="btn btn-primary" type="submit" value="Create">
+    </form>
+  </div>
+{% endblock %}

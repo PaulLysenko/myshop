@@ -1,0 +1,35 @@
+{% extends "base_layout.html" %}
+
+{% block body %}
+
+  <h1 class="text-center" style="font-style: italic">Create an account</h1>
+  <div class="input-group">
+    <form method="post" action="{% url 'registration_try' %}">
+      {% csrf_token %}
+      <div class="form-outline" data-mdb-input-init>
+        {{ form.as_p }}
+        <div class="error-text" id="email_error"></div>
+      </div>
+      <input class="btn btn-primary" type="submit" value="Validate">
+    </form>
+
+    <script>
+      const emailInput = document.getElementById('id_email');
+      const emailError = document.getElementById('email_error');
+
+      emailInput.addEventListener('input', function () {
+        const email = this.value;
+
+        if (!isValidEmail(email)) {
+          emailError.textContent = 'Enter a valid email address.';
+        } else {
+          emailError.textContent = '';
+        }
+      });
+
+      function isValidEmail(email) {
+        return email.includes('@');
+      }
+    </script>
+  </div>
+{% endblock %}

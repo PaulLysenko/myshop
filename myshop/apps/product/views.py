@@ -4,8 +4,6 @@ from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import render
 from django.views import View
-from django.views.generic import ListView
-from django.views.generic import DetailView
 from django.views.generic import TemplateView
 from django.shortcuts import get_object_or_404
 
@@ -35,14 +33,18 @@ class ProductsView(View):
 
     def post(self, request):
 
-        products = Product.objects.all()
+        products = Product.objects.all().select_related(
+            'brand',
+        )
         form = SearchForm(request.POST)
 
         form.is_valid()
         search_value = form.cleaned_data['search']
 
         if search_value:
-            query = Q(name=search_value) | Q(description__icontains=search_value)
+            query = Q(name=search_value) | \
+                    Q(description__icontains=search_value) | \
+                    Q(brand__name__icontains=search_value)
             try:
                 price_search = Decimal(search_value)
             except Exception as e:
@@ -63,7 +65,7 @@ class ProductsView(View):
 
 
 def product_by_id(request, product_id=None, *args, **kwargs):
-    if not (products := Product.objects.filter(id=product_id)):
+    if not (products := Product.objects.filter(id=product_id).select_related('brand')):
         raise Http404("Product does not exist")
 
     return render(request, 'product.html', context={'product': products.last()})
