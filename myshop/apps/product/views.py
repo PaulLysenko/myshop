@@ -38,7 +38,9 @@ class ProductsView(View):
 
     def post(self, request):
 
-        products = Product.objects.all()
+        products = Product.objects.all().select_related(
+            'brand',
+        )
         form = SearchForm(request.POST)
 
         form.is_valid()
@@ -61,7 +63,6 @@ class ProductsView(View):
             'form': form,
         }
         response = render(request, self.template_name, context=context)
-
         return response
 
 
@@ -112,5 +113,4 @@ class BrandView(View):
             'form': form,
         }
         response = render(request, self.template_name, context=context)
-
         return response
