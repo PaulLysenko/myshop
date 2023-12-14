@@ -45,3 +45,23 @@ class ValidateRegTryForm(forms.Form):
         ),
         required=True,
     )
+    password2 = forms.CharField(
+        label='',
+        widget=forms.PasswordInput(
+            attrs={
+                'placeholder': 'Confirm your password',
+                'class': 'form-control',
+            },
+        ),
+        required=True,
+    )
+
+    def clean(self):
+        self.cleaned_data = super().clean()
+        pass1 = self.cleaned_data['password']
+        pass2 = self.cleaned_data['password2']
+
+        if pass1 != pass2:
+            raise forms.ValidationError({'password': 'Passwords must be the same!'})
+
+        return self.cleaned_data

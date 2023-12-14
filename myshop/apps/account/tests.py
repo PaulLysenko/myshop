@@ -1,4 +1,5 @@
 from uuid import uuid4
+from unittest import skip
 
 from django.test import TransactionTestCase, Client
 from django.urls import reverse
@@ -15,6 +16,7 @@ class SmokeTestRegTry(TransactionTestCase):
         result = self.client.get(url)
         self.assertEqual(result.status_code, 200)
 
+    # @skip('FIXME')
     def test_successful_registration_try(self):
         url = reverse('registration_try')
         data = {'email': 'qwerty@test.com'}
