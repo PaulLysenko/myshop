@@ -17,3 +17,4 @@ class UserRegistrationForm(UserCreationForm):
     class Meta:
         model = RegTry
         fields = ('email', 'password1', 'password2')
+
