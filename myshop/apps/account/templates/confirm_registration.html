@@ -1,0 +1,29 @@
+{% extends "base_layout.html" %}
+{% block body %}
+
+
+<style>.input-group {
+      width: 100%;
+    }
+
+    form {
+      padding: 20px;
+      border: 1px solid #526c82;
+      border-radius: 25px;
+      box-shadow: 0 0 10px rgb(82, 108, 130);
+      max-width: 400px;
+      margin: auto;
+    }
+</style>
+
+<h1 class="text-center" style="font-style: italic">Create an account</h1>
+<div class="input-group">
+    <form method="post" action="{% url 'confirm_registration' otc %}">
+        {% csrf_token %}
+        <div class="form-outline" data-mdb-input-init>
+            {{ form }}
+        </div>
+        <input class="btn btn-primary" type="submit" value="Create">
+    </form>
+</div>
+{% endblock %}
