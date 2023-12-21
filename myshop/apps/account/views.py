@@ -1,11 +1,16 @@
+from gettext import gettext as _
+
 from django.contrib.auth.models import User
+from django.conf import settings
+from django.core import mail
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views import View
 
 from apps.account.models import RegTry
 from apps.account.forms import RegTryForm, ValidateRegTryForm
-
+from apps.account.functions import send_registration_email
 
 class RegTryView(View):
     template_name = 'registration_try.html'
@@ -22,21 +27,19 @@ class RegTryView(View):
     def post(self, request):
         form = RegTryForm(request.POST)
 
-        if form.is_valid():
-            email_value = form.cleaned_data['email']
+        if not form.is_valid():
+            return render(request, self.template_name, {'form': form})
 
-            if User.objects.filter(email=email_value).exists() or RegTry.objects.filter(email=email_value).exists():
-                return render(request, 'invalid_data.html', {'data': 'Email is not valid.'}, status=400)
+        email_value = form.cleaned_data['email']
 
-            reg_try = RegTry.objects.create(email=email_value)
+        if User.objects.filter(email=email_value).exists() or RegTry.objects.filter(email=email_value).exists():
+            return render(request, 'invalid_data.html', {'data': 'Email is not valid.'}, status=400)
 
-            # make full URL using reg_try.otc
-            # 'http://127.0.0.1:8001/registration/1da91660-3282-4fd8-a2a2-d98995eaf413/'
-            # send mail to reg_try.email
+        reg_try = RegTry.objects.create(email=email_value)
 
-            return redirect(reverse('home'))
+        send_registration_email(reg_try)
 
-        return render(request, self.template_name, {'form': form})
+        return redirect(reverse('home'))
 
 
 class ValidateRegTryView(View):
@@ -67,6 +70,16 @@ class ValidateRegTryView(View):
 
             return render(request, self.template_name, context=context)
 
-        # create user here
+        # todo:  into function ->
+        user = User.objects.create_user(
+            username=f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
+            email=reg_try.email,
+            password=form.cleaned_data['password'],
+            first_name=form.cleaned_data['first_name'],
+            last_name=form.cleaned_data['last_name'],
+        )
+        reg_try.user = user
+        reg_try.save()
+        # todo:  into function <-
 
-        # redirect to home / login page
+        return redirect(reverse('home'))

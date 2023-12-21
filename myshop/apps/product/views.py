@@ -13,7 +13,7 @@ from apps.product.models import Brand
 
 
 class HomeView(TemplateView):
-    template_name = 'base_layout.html'
+    template_name = 'home.html'
 
 
 class ProductsView(View):
