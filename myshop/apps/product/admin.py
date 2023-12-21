@@ -7,11 +7,9 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'created_at', 'price', 'brand']
 
 
-admin.site.register(Product, ProductAdmin)
-
-
 class BrandAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'country']
 
 
+admin.site.register(Product, ProductAdmin)
 admin.site.register(Brand, BrandAdmin)

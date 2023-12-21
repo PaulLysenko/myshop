@@ -17,6 +17,7 @@ class RegTryForm(forms.Form):
 
 class ValidateRegTryForm(forms.Form):
     first_name = forms.CharField(
+        max_length=70,
         label='',
         widget=forms.TextInput(
             attrs={
@@ -27,6 +28,7 @@ class ValidateRegTryForm(forms.Form):
         required=True,
     )
     last_name = forms.CharField(
+        max_length=70,
         label='',
         widget=forms.TextInput(
             attrs={
