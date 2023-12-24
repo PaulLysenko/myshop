@@ -1,16 +1,13 @@
-from gettext import gettext as _
-
 from django.contrib.auth.models import User
-from django.conf import settings
-from django.core import mail
 from django.shortcuts import render, redirect, get_object_or_404
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views import View
 
 from apps.account.models import RegTry
 from apps.account.forms import RegTryForm, ValidateRegTryForm
 from apps.account.functions import send_registration_email
+from apps.account.functions import create_user_and_link
+
 
 class RegTryView(View):
     template_name = 'registration_try.html'
@@ -62,7 +59,6 @@ class ValidateRegTryView(View):
         form = ValidateRegTryForm(request.POST)
 
         if not form.is_valid():
-
             context = {
                 'otc': reg_try.otc,
                 'form': form,
@@ -71,15 +67,7 @@ class ValidateRegTryView(View):
             return render(request, self.template_name, context=context)
 
         # todo:  into function ->
-        user = User.objects.create_user(
-            username=f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
-            email=reg_try.email,
-            password=form.cleaned_data['password'],
-            first_name=form.cleaned_data['first_name'],
-            last_name=form.cleaned_data['last_name'],
-        )
-        reg_try.user = user
-        reg_try.save()
+        create_user_and_link(reg_try,form)
         # todo:  into function <-
 
         return redirect(reverse('home'))

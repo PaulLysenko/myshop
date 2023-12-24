@@ -1,6 +1,7 @@
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
+from django.contrib.auth.models import User
 
 
 def send_registration_email(reg_try):
@@ -24,3 +25,15 @@ def send_registration_email(reg_try):
         print(f'success {link}')
     except Exception as exception:  # pylint: disable=W0703
         print(f'[SENDMAIL] EXCEPTION {exception}')
+
+
+def create_user_and_link(reg_try, form):
+    user = User.objects.create_user(
+        username=f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
+        email=reg_try.email,
+        password=form.cleaned_data['password'],
+        first_name=form.cleaned_data['first_name'],
+        last_name=form.cleaned_data['last_name'],
+    )
+    reg_try.user = user
+    reg_try.save()
