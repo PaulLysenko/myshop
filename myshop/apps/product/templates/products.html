@@ -13,7 +13,7 @@
 </div>
 <div class="mt-5">
     <ul>
-        {% for products in product %}
+        {% for product in products %}
         <li>
             <a target="_blank" href="{% url 'product' product.id %}">{{product.price}}: {{product.name}} -> {{product.brand.name}}</a>
         </li>
