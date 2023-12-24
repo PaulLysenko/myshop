@@ -18,6 +18,17 @@
 </div>
 {% endblock %}
 
+ <aside>
+        <span class="logo">MyShop</span>
+        <h3>Navigation</h3>
+        <ul>
+            <a href="{% url 'home' %}"><li>Home</li></a>
+            <a href="{% url 'products' %}"><li>Products</li></a>
+            <a href="{% url 'registration_try' %}"><li>Registration</li></a>
+        </ul>
+    </aside>
+
+
 <div class="mx-3 my-3">
     {% block body %}
     {% endblock %}
