@@ -1,0 +1,36 @@
+{% extends "base_layout.html" %}
+
+{% block body %}
+  <style>.input-group {
+      width: 100%;
+    }
+
+    form {
+      padding: 20px;
+      border: 1px solid #526c82;
+      box-shadow: 0 0 10px rgb(82, 108, 130);
+      max-width: 400px;
+      margin: auto;
+    }
+
+    .error-text {
+      color: #a81212;
+      font-size: 12px;
+    }
+  </style>
+
+  <h1 class="text-center" style="font-style: italic">Login</h1>
+  <div class="input-group">
+    <form method="post" action="{% url 'auth-login' %}">
+    {# login url here #}
+      {% csrf_token %}
+      <div class="form-outline" data-mdb-input-init>
+        {{ form.as_p }}
+        <div class="error-text" id="email_error"></div>
+      </div>
+      <input class="btn btn-primary" type="submit" value="Login">
+    </form>
+
+
+  </div>
+{% endblock %}
