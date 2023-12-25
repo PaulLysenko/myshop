@@ -1,8 +1,9 @@
+
 from django.contrib.auth.models import User
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
-
 from apps.account.models import RegTry
 from apps.account.forms import RegTryForm, ValidateRegTryForm
 from apps.account.functions import send_registration_email
@@ -14,10 +15,7 @@ class RegTryView(View):
 
     def get(self, request):
         form = RegTryForm()
-        context = {
-            'form': form,
-        }
-
+        context = {'form': form}
         response = render(request, self.template_name, context=context)
         return response
 
@@ -44,9 +42,7 @@ class ValidateRegTryView(View):
 
     def get(self, request, otc):
         form = ValidateRegTryForm()
-
         reg_try = get_object_or_404(RegTry, otc=otc, user_id__isnull=True)
-
         context = {
             'otc': reg_try.otc,
             'form': form,
@@ -55,7 +51,6 @@ class ValidateRegTryView(View):
 
     def post(self, request, otc):
         reg_try = get_object_or_404(RegTry, otc=otc, user_id__isnull=True)
-
         form = ValidateRegTryForm(request.POST)
 
         if not form.is_valid():
@@ -63,7 +58,6 @@ class ValidateRegTryView(View):
                 'otc': reg_try.otc,
                 'form': form,
             }
-
             return render(request, self.template_name, context=context)
 
         # todo:  into function ->

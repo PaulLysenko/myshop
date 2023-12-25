@@ -13,10 +13,26 @@
 {% block header %}
 <div class="d-flex flex-column bd-highlight mb-3 p-3 text-center bg-primary">
     <h1>
-        Welcome to my shop
+        Welcome to my shop {% if user.is_authenticated %}{{ user.username }}{% endif %}
     </h1>
 </div>
 {% endblock %}
+
+ <aside>
+        <span class="logo">MyShop</span>
+        <h3>Navigation</h3>
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'auth-logout' %}">Logout</a></li>
+                <li><a href="{% url 'products' %}">Products</a></li>
+            {% else %}
+                <li><a href="{% url 'registration_try' %}">Registration</a> / <a href="{% url 'auth-login' %}">Login</a></li>
+            {% endif %}
+        </ul>
+    </aside>
+
 
 <div class="mx-3 my-3">
     {% block body %}

@@ -15,6 +15,29 @@ class RegTryForm(forms.Form):
     )
 
 
+class LoginForm(forms.Form):
+
+    email = forms.CharField(
+        label='',
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': 'Enter your email',
+                'class': 'form-control',
+            },
+        ),
+    )
+
+    password = forms.CharField(
+        label='',
+        widget=forms.TextInput(
+            attrs={
+                'placeholder': 'Enter your password',
+                'class': 'form-control',
+            },
+        ),
+    )
+
+
 class ValidateRegTryForm(forms.Form):
     first_name = forms.CharField(
         max_length=70,

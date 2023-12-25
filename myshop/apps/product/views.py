@@ -1,8 +1,11 @@
 from decimal import Decimal
 
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
 from django.shortcuts import get_object_or_404
@@ -20,6 +23,9 @@ class ProductsView(View):
     template_name = 'products.html'
 
     def get(self, request):
+        if not request.user.is_authenticated:
+            return redirect(reverse('auth-login'))
+
         form = SearchForm()
 
         products = Product.objects.all()
@@ -31,6 +37,7 @@ class ProductsView(View):
         response = render(request, self.template_name, context=context)
         return response
 
+    @method_decorator(login_required())
     def post(self, request):
 
         products = Product.objects.all().select_related(
