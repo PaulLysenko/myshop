@@ -8,9 +8,9 @@ class CartItem(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     cart = models.ForeignKey('cart.Cart', on_delete=models.CASCADE, related_name='items')
     # todo: creation time
-    # todo: finalizing time
 
 
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     total_price = models.DecimalField(max_digits=12, decimal_places=2)  # recalculate
+    # todo: finalizing time
