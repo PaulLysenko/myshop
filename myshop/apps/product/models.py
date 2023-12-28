@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import CharField
 
 
 class Brand(models.Model):
@@ -17,6 +16,7 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now=True, auto_created=True)
     description = models.TextField(null=True, blank=True)
     brand = models.ForeignKey(Brand, related_name='products', on_delete=models.CASCADE, null=True)
+    is_hidden = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.name}: {self.price}'

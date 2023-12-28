@@ -15,6 +15,7 @@
     <ul>
         {% for product in products %}
         <li>
+            {#  todo: add button [to cart] post to add_to_cart_view #}
             <a target="_blank" href="{% url 'product' product.id %}">{{product.price}}: {{product.name}} -> {{product.brand.name}}</a>
         </li>
         {% endfor %}

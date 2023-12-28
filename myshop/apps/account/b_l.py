@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from .models import RegTry
 
 
 def process_registration(form, reg_try):

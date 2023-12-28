@@ -1,0 +1,36 @@
+version: "3.3"
+
+services:
+  web:
+    build: ./myshop
+    ports:
+      - "8000:8000"  # local / container
+    volumes:
+        - .:/app
+    depends_on:
+      - db_postgres
+    command:
+      bash -c "chmod +x ./myshop/entrypoint.sh && ./myshop/entrypoint.sh"
+
+  db_postgres:
+    container_name: db_postgres
+    build: ./postgres
+    ports:
+      - "5433:5432" # host port 5433 -> linked with container port 5432
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+#  celeryworker:
+#    container_name: celeryworker
+#    build: ./myshop
+#    volumes:
+#      - ./:/backend
+#    command: celery -A 'celery_app.celeryapp' worker --pool=prefork -l info
+#    depends_on:
+#      - web
+
+volumes:
+  postgres-db-volume:
