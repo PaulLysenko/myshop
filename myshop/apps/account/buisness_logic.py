@@ -1,8 +1,7 @@
 from django.contrib.auth.models import User
-from .models import RegTry
 
 
-def process_registration(form, reg_try):
+def user_creation(form, reg_try):
     user = User.objects.create_user(
         username=f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
         email=reg_try.email,
