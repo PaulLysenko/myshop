@@ -9,8 +9,8 @@ services:
         - .:/app
     depends_on:
       - db_postgres
-    command:
-      bash -c "chmod +x ./myshop/entrypoint.sh && ./myshop/entrypoint.sh"
+#    command:
+#      bash -c "chmod +x ./myshop/entrypoint.sh && ./myshop/entrypoint.sh"
 
   db_postgres:
     container_name: db_postgres
