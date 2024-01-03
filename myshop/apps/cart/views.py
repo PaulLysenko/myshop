@@ -1,12 +1,18 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
-# Create your views here.
+from apps.cart.models import Cart, CartItem
 
-# TODO: add_to_cart_view
-# view for adding product into cart by id and quantity
-# user -> cart (get or create)
-# product_id, quantity -> create cart_item
-# cart_item -> cart
 
+class AddToCartView:
+
+    def view_cart(request):
+        cart = Cart.objects.get(user=request.user)
+        return render(request, 'cart/view_cart.html', {'cart': cart})
+
+    def add_to_cart(request, product_name, price):
+        cart = Cart.objects.get(user=request.user)
+        cart_item, created = CartItem.objects.get_or_create(product_name=product_name, price=price)
+        cart.items.add(cart_item)
+        return redirect('view_cart')
 
 # view for cart. get + update (delete item)
