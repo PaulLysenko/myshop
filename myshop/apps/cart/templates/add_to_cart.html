@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Add to Cart</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit">Add to Cart</button>
+  </form>
+  <a href="{% url 'view_cart' %}">Back to Cart</a>
+{% endblock %}
