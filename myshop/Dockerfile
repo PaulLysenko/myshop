@@ -4,7 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
 
-RUN apt-get update && apt-get install -y netcat-traditional mc
+RUN apt-get update && apt-get install -y netcat-traditional mc dos2unix
 
 WORKDIR /app
 
@@ -14,6 +14,8 @@ RUN pip install -r requirements.txt
 COPY . .
 
 COPY entrypoint.sh /usr/local/bin/
+
+RUN dos2unix /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["entrypoint.sh"]
 
