@@ -14,7 +14,7 @@ services:
     container_name: db_postgres
     build: ./postgres
     ports:
-      - "5433:5432" # host port 5433 -> linked with container port 5432
+      - "5432:5432" # host port 5433 -> linked with container port 5432
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     environment:

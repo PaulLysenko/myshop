@@ -7,7 +7,10 @@ class CartItem(models.Model):
     quantity = models.PositiveSmallIntegerField(default=1)
     price = models.DecimalField(max_digits=12, decimal_places=2)
     cart = models.ForeignKey('cart.Cart', on_delete=models.CASCADE, related_name='items')
+    creation_time = models.DateTimeField(auto_now_add=True)
+    finalizing_time = models.DateTimeField(null=True, blank=True)
     # todo: creation time
+
 
 
 class Cart(models.Model):
