@@ -8,14 +8,13 @@ RUN apt-get update && apt-get install -y netcat-traditional mc dos2unix
 
 WORKDIR /app
 
-COPY requirements.txt .
+COPY myshop/requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY . .
 
-COPY entrypoint.sh /usr/local/bin/
+COPY myshop/entrypoint.sh /usr/local/bin/
 
 RUN dos2unix /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["entrypoint.sh"]
-

@@ -2,7 +2,8 @@ version: "3.3"
 
 services:
   web:
-    build: ./myshop
+    build:
+      dockerfile: ./myshop/Dockerfile
     ports:
       - "8000:8000"  # local / container
     volumes:
@@ -21,14 +22,44 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
 
-#  celeryworker:
-#    container_name: celeryworker
-#    build: ./myshop
-#    volumes:
-#      - ./:/backend
-#    command: celery -A 'celery_app.celeryapp' worker --pool=prefork -l info
-#    depends_on:
-#      - web
+  db_redis:
+    container_name: db_redis
+    image: redis:7.2.3
+    ports:
+      - "6379:6379"
+
+  celeryworker:
+    container_name: celeryworker
+    build:
+      dockerfile: ./myshop/DockerfileCelery
+    volumes:
+      - ./:/opt/celeryworker
+    command: celery -A celery_app.celeryapp worker --concurrency 2 -l info
+    depends_on:
+      - web
+      - db_redis
+
+  celeryscheduler:
+    container_name: celeryscheduler
+    build:
+      dockerfile: ./myshop/DockerfileCelery
+    volumes:
+      - ./:/opt/celeryworker
+    command: celery -A celery_app.celeryapp beat -l info
+    depends_on:
+      - web
+      - db_redis
+
+  flower:
+    container_name: flower
+    image: mher/flower:1.2
+    command: celery --broker=redis://db_redis:6379/0 flower --port=5555
+    ports:
+      - "5555:5555"
+    depends_on:
+      - db_redis
+      - celeryworker
+      - celeryscheduler
 
 volumes:
   postgres-db-volume:

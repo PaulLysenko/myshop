@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+
+from celery.schedules import crontab
 from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv()
 
@@ -40,6 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # external apps
+    'celery_app',
 
     # external libraries
 
@@ -148,6 +154,25 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 2525))  # ukr net smtp port 2525
 EMAIL_USE_SSL = True
+
+
+# redis
+REDIS_HOST = 'db_redis'
+REDIS_PORT = 6379
+
+
+# celery
+CELERY_BROKER_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
+CELERY_RESULT_BACKEND = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
+
+
+CELERY_BEAT_SCHEDULE = {
+    # 'test_task': {
+    #     'task': 'celery_app.tasks.test_task',
+    #     'schedule': crontab(minute='*/1'),
+    #     # 'schedule': timedelta(minutes=5),
+    # },
+}
 
 
 if DEBUG:

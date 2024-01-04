@@ -6,8 +6,11 @@ from django.urls import reverse
 from django.views import View
 from apps.account.models import RegTry
 from apps.account.forms import RegTryForm, ValidateRegTryForm, LoginForm
-from .b_l import process_registration
 from django.contrib.auth import authenticate, login, logout
+
+from apps.account.tasks import send_email_task
+
+from .tasks import process_registration_task
 
 
 class RegTryView(View):
@@ -32,6 +35,8 @@ class RegTryView(View):
 
         reg_try = RegTry.objects.create(email=email_value)
         reg_try.send_registration_mail()
+
+        send_email_task.delay(reg_try.otc, reg_try.email)
 
         return redirect(reverse('home'))
 
@@ -59,7 +64,7 @@ class ValidateRegTryView(View):
             }
             return render(request, self.template_name, context=context)
 
-        process_registration(form, reg_try)
+        process_registration_task.delay(form.cleaned_data, reg_try.id)
 
         return redirect(reverse('home'))
 
