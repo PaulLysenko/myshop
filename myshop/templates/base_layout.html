@@ -27,6 +27,7 @@
             {% if user.is_authenticated %}
                 <li><a href="{% url 'auth-logout' %}">Logout</a></li>
                 <li><a href="{% url 'products' %}">Products</a></li>
+                <li><a href="{% url 'view_cart' %}">Cart</a></li>
             {% else %}
                 <li><a href="{% url 'registration_try' %}">Registration</a> / <a href="{% url 'auth-login' %}">Login</a></li>
             {% endif %}
