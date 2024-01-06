@@ -15,8 +15,13 @@
     <ul>
         {% for product in products %}
         <li>
-            {#  todo: add button [to cart] post to add_to_cart_view #}
             <a target="_blank" href="{% url 'product' product.id %}">{{product.price}}: {{product.name}} -> {{product.brand.name}}</a>
+            <form method="post" action="{% url 'cart' %}">
+                {% csrf_token %}
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+                <input type="hidden" name="price" value="{{ product.price }}">
+                <button type="submit">Add to Cart</button>
+            </form>
         </li>
         {% endfor %}
     </ul>

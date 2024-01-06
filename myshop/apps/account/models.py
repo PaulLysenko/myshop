@@ -22,7 +22,7 @@ class RegTry(models.Model):
             'message': 'Please verify your account',
             'from_email': settings.EMAIL_HOST_USER,
             'recipient_list': [self.email],
-            'html_message': render_to_string('registration_try.html', context=context),
+            'html_message': render_to_string('registration_confirm.html', context=context),
         }
 
         try:

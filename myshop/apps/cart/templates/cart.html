@@ -1,0 +1,32 @@
+{% extends "base_layout.html" %}
+
+{% block body %}
+  <h1 style="font-style: italic">Cart:</h1>
+  <div class="mt-5">
+    <ul>
+      {% for item in cart_items %}
+        <li>
+          <a target="_blank" href="{% url 'product' item.product.id %}">
+            {{ item.product.price }}: {{ item.product.name }} -> {{ item.product.brand.name }}
+          </a>
+          <span>Quantity: {{ item.quantity }}</span>
+
+          <form method="post" action="{% url 'update_cart' %}">
+            {% csrf_token %}
+            <input type="hidden" name="product_id" value="{{ item.product.id }}">
+            <label for="id_quantity">Update Quantity:</label>
+            {{ item.update_quantity_form.quantity }}
+            <input type="submit" value="Update">
+          </form>
+
+          <form method="post" action="{% url 'remove_from_cart' %}">
+            {% csrf_token %}
+            <input type="hidden" name="product_id" value="{{ item.product.id }}">
+            <input type="submit" value="Remove">
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+{% endblock %}
