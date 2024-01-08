@@ -1,32 +1,44 @@
 from django.shortcuts import render, redirect
 
-from apps.cart.forms import Form
 from apps.cart.models import Cart, CartItem
 from django.views import View
 
+from apps.product.models import Product
 
-# TODO: add_to_cart_view
-# view for adding product into cart by id and quantity
-# user -> cart (get or create)
-# product_id, quantity -> create cart_item
-# cart_item -> cart
 
 class CartView(View):
-    def view_cart(self, request):
-        cart = Cart.objects.get(user=request.user)
-        return render(request, 'cart/view_cart.html', {'cart': cart})
+    template = 'view_cart.html'
 
-    def post(request, product_name, price):
-        cart = Cart.objects.get(user=request.user)
-        form = Form(request.POST)
-        if form.is_valid():
-            quantity = form.cleaned_data['quantity']
-            cart_item, created = CartItem.objects.get_or_create(product_name=product_name, price=price)
-            cart_item.quantity += quantity
+    def get(self, request):
+        cart, _ = Cart.objects.get_or_create(
+            user_id=request.user.id,
+            finalizing_time__isnull=True,
+        )
+
+        return render(request, self.template, context={'cart': cart})
+
+
+class AddCartView(View):
+    template = 'view_cart.html'
+
+    def post(self, request, product_id):
+        cart, _ = Cart.objects.get_or_create(
+            user_id=request.user.id,
+            finalizing_time__isnull=True,
+        )
+
+        product = Product.objects.get(id=product_id)
+
+        cart_item, created = CartItem.objects.get_or_create(
+            product_id=product.id,
+            cart_id=cart.id,
+            defaults={
+                'quantity': 1,
+                'price': product.price,
+            }
+        )
+        if not created:
+            cart_item.quantity += 1
             cart_item.save()
-            cart.items.add(cart_item)
-            return redirect('view_cart')
 
-        return render(request, 'cart/view_cart.html', {'form': form, 'product_name': product_name, 'price': price})
-
-# view for cart. get + update (delete item)
+        return redirect('view_cart')

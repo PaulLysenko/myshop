@@ -1,16 +1,19 @@
 {% extends 'base_layout.html' %}
 
-{% block content %}
+{% block body %}
   <h2>Your Cart</h2>
   <ul>
     {% for item in cart.items.all %}
       <li>
-        {{ item.product_name }} - Quantity: {{ item.quantity }} - Price: ${{ item.price }}
-        <a href="{% url 'remove_from_cart' item.id %}">Remove</a>
-          <a href="{% url '' %}">Buy</a>
+        {{ item.product.name }} - Quantity: {{ item.quantity }} - Price: ${{ item.price }}
+{#        <a href="{% url 'remove_from_cart' item.id %}">Remove</a>#}
+{#          <a href="{% url '' %}">Buy</a>#}
       </li>
     {% endfor %}
   </ul>
-    <p>Cart Created At: {{ cart.created_at }}</p>
-    <p>Cart Closed At: {{ cart.closed_at }}</p>
+
+
+    <p>TOTAL: {{ cart.total_price }}</p>
+    <p>Cart Created At: {{ cart.creation_time }}</p>
+    <p>Cart Closed At: {{ cart.finalizing_time }}</p>
 {% endblock %}

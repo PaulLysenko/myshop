@@ -10,9 +10,8 @@ from django.views import View
 from django.views.generic import TemplateView
 from django.shortcuts import get_object_or_404
 
-from apps.product.models import Product
+from apps.product.models import Product, Brand
 from apps.product.forms import SearchForm
-from apps.product.models import Brand
 
 
 class HomeView(TemplateView):
@@ -71,11 +70,14 @@ class ProductsView(View):
         return response
 
 
-def product_by_id(request, product_id=None, *args, **kwargs):
-    if not (products := Product.objects.filter(id=product_id).select_related('brand')):
-        raise Http404("Product does not exist")
+class ProductView(View):
+    template = 'product.html'
 
-    return render(request, 'product.html', context={'product': products.last()})
+    def get(self, request, product_id):
+        if not (products := Product.objects.filter(id=product_id).select_related('brand')):
+            raise Http404("Product does not exist")
+
+        return render(request, self.template, context={'product': products.last(), 'product_id': product_id})
 
 
 class BrandsView(View):

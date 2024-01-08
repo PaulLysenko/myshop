@@ -11,3 +11,7 @@ class SearchForm(forms.Form):
             },
         ),
     )
+
+
+class ProductToCartForm(forms.Form):
+    pass
