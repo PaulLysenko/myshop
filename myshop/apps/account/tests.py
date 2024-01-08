@@ -1,5 +1,4 @@
 from uuid import uuid4
-from unittest import skip
 
 from django.test import TransactionTestCase, Client
 from django.urls import reverse

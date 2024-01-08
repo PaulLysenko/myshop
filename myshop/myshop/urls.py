@@ -19,13 +19,14 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 
-from apps.product import views
+from .views import home
 
 urlpatterns = [
-    path('', views.HomeView.as_view(), name='home'),
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
     path('products/', include('apps.product.urls')),
     path('registration/', include('apps.account.urls')),
+    path('cart/', include('apps.cart.urls')),
 ]
 
 if settings.DEBUG:
