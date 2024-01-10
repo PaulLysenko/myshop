@@ -98,6 +98,10 @@ DATABASES = {
         'HOST': 'db_postgres',
         'PORT': '5432',
     },
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
 }
 
 
@@ -176,11 +180,12 @@ CELERY_BEAT_SCHEDULE = {
 
 
 if DEBUG:
+    ALLOWED_HOSTS.extend([
+        "*",
+    ])
+
     INSTALLED_APPS.extend([
         "debug_toolbar",
-    ])
-    ALLOWED_HOSTS.extend([
-        '*',
     ])
     MIDDLEWARE.extend([
         "debug_toolbar.middleware.DebugToolbarMiddleware",
@@ -188,3 +193,6 @@ if DEBUG:
     INTERNAL_IPS.extend([
         "127.0.0.1",
     ])
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+    }
