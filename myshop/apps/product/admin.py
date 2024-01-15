@@ -25,6 +25,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     @staticmethod
     def import_products_view(request):
+        result = ''
         form = ProductImportForm()
 
         if request.method == 'POST':
