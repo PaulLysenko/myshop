@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div>
+            <button class="btn btn-primary" type="submit">
+                Почати
+            </button>
+        </div>
+    </form>
+
+{% if result %}
+    <h4> {{ result }}</h4>
+{% endif %}
+
+<a href="{% url 'admin:index' %}"><h4> < BACK TO ADMIN </h4></a>
+
+</body>
+</html>

@@ -114,7 +114,7 @@ class BrandsView(View):
 class BrandDetailView(View):
     template_name = 'brand.html'
 
-    def get(self, request, brand_id=None, *args, **kwargs):
+    def get(self, request, brand_id=None):
         brand = get_object_or_404(Brand, id=brand_id)
 
         context = {'brand': brand}

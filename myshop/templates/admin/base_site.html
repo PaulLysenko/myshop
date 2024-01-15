@@ -1,0 +1,23 @@
+{% extends "admin/base.html" %}
+{% load i18n admin_urls %}
+
+{% block title %}
+    MyShop
+{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}">My shop</a></div>
+{% endblock %}
+
+{% block nav-global %}
+{{ block.super }}
+
+<style>.top-menu li {display:inline-block;padding:10px}</style>
+<ul class="top-menu">
+    <li>
+        <a href="{% url 'admin:import_product_file' %}" class="section">
+            Import products (xls)
+        </a>
+    </li>
+</ul>
+{% endblock %}

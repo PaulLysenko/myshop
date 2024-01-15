@@ -1,0 +1,8 @@
+[MASTER]
+ignore-paths=
+    ^.*migrations/.*$,
+disable=
+    E0401 # Unable to import (import-error)
+
+[FORMAT]
+max-line-length=120
