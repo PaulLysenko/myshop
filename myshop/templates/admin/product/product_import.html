@@ -4,9 +4,9 @@
 
 {% block content %}
 
-<h1>Автоматичне наповнення магазину продуктами за допомогою файлу</h1>
+    <h1>Автоматичне наповнення магазину продуктами за допомогою файлу</h1>
 
-<form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
         <div>
@@ -16,8 +16,8 @@
         </div>
     </form>
 
-{% if result %}
-    <h4> {{ result }}</h4>
-{% endif %}
+    {% if result %}
+        <h4> {{ result }}</h4>
+    {% endif %}
 
 {% endblock %}
