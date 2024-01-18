@@ -2,7 +2,11 @@
 ignore-paths=
     ^.*migrations/.*$,
 disable=
-    E0401 # Unable to import (import-error)
+    E0401,
+    C0114,
+    C0115,
+    C0116,
+    W1203
 
 [FORMAT]
 max-line-length=120

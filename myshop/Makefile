@@ -1,2 +1,2 @@
 pylint:
-	pylint --recursive=y .
+	pylint --recursive=y ..

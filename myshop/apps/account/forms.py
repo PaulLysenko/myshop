@@ -81,6 +81,10 @@ class ValidateRegTryForm(forms.Form):
         required=True,
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cleaned_data = None
+
     def clean(self):
         self.cleaned_data = super().clean()
         pass1 = self.cleaned_data['password']

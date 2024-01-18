@@ -10,4 +10,5 @@ class RegTry(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return f"{self.email} at {self.c_time.strftime('%d-%m-%Y %H:%M:%S')}"
+        date = self.c_time
+        return f"{self.email} at {date.strftime('%d-%m-%Y %H:%M:%S')}"

@@ -1,4 +1,6 @@
 import logging
+import csv
+
 from django.core import mail
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -6,14 +8,13 @@ from django.contrib.auth.models import User
 
 from celery_app import celery_app
 from apps.account.models import RegTry
-
+from apps.account.bl import save_file_to_storage
 
 logger = logging.getLogger(__name__)
 
 
 @celery_app.task
 def send_email_task(otc, email):
-
     context = {
         'link': f'http://{settings.HOST_NAME}/registration/{otc}',
 
@@ -32,7 +33,7 @@ def send_email_task(otc, email):
     logger.info(f'Send email to {mail_data["recipient_list"]}')
     try:
         mail.send_mail(**mail_data)
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         logger.error(f'Error email sending: {e}')
 
 
@@ -48,3 +49,16 @@ def process_registration_task(data, reg_try_id):
     )
     reg_try.user = user
     reg_try.save()
+
+
+@celery_app.task
+def parsing_file(file_path):
+    try:
+        with open(file_path, "r") as f:
+            reader = csv.reader(f)
+            for row in reader:
+                save_file_to_storage(row)
+    except FileNotFoundError:
+        print(f"File not found: {file_path}")
+    except csv.Error as e:
+        print(f"CSV parsing error in file {file_path}: {e}")

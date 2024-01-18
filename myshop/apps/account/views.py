@@ -1,4 +1,3 @@
-
 from django.contrib.auth.models import User
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -7,7 +6,6 @@ from django.views import View
 from apps.account.models import RegTry
 from apps.account.forms import RegTryForm, ValidateRegTryForm, LoginForm
 from django.contrib.auth import authenticate, login, logout
-
 from apps.account.tasks import send_email_task
 
 from .tasks import process_registration_task
@@ -17,12 +15,28 @@ class RegTryView(View):
     template_name = 'registration_try.html'
 
     def get(self, request):
+        """
+
+        Args:
+            request:
+
+        Returns:
+
+        """
         form = RegTryForm()
         context = {'form': form}
         response = render(request, self.template_name, context=context)
         return response
 
     def post(self, request):
+        """
+        
+        Args:
+            request:
+
+        Returns:
+
+        """
         form = RegTryForm(request.POST)
 
         if not form.is_valid():
@@ -89,7 +103,7 @@ class LoginView(View):
 
         try:
             username = User.objects.get(email=email_value.lower()).username
-        except User.DoesNotExist:
+        except User.DoesNotExist:  # pylint: disable=broad-exception-caught
             form.add_error(None, 'Incorrect login or password')
             return render(request, self.template_name, {'form': form})
 
@@ -107,7 +121,6 @@ class LoginView(View):
 class LogoutView(View):
 
     def get(self, request):
-
         if request.user:
             logout(request)
 
