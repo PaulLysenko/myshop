@@ -22,6 +22,7 @@ class ProductImportForm(forms.Form):
     file = forms.FileField()
 
     def clean_file(self):
+        """"""
         value = self.cleaned_data.get('file')
 
         if value and value.name.split('.')[-1] != 'xlsx':
