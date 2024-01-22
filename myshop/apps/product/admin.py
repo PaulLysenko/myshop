@@ -1,24 +1,12 @@
 from django.contrib import admin
 from django.urls import re_path
 from django.shortcuts import render
+from django.contrib import messages
 
 from apps.product.forms import ProductImportForm
 from apps.product.models import Product
 from apps.product.models import Brand
 from apps.product.bl import save_file_to_storage, parse_xlsx_file
-
-
-def handle_file(file):
-    # todo: parse file (pandas)
-    # todo: check headers
-    # todo: get data
-    # todo: save data into DB into products
-    # todo: return result message 'success' or errors
-
-    # name(str),   brand(select id by name)  price(decimal), description(text),
-    # Iphone       Apple                     100500.99       blablabla
-
-    return 'success'
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -36,7 +24,15 @@ class ProductAdmin(admin.ModelAdmin):
 
                 path = save_file_to_storage(file)
 
+                # TODO: HW create file_import object in db (file path)
+
+                # TODO: HW make celery task (file_import.id) ---> into celery
+
+                # get file_import by id
+
                 product_data_list = parse_xlsx_file(path)
+
+                # validate data
 
                 for product_data in product_data_list:
                     product, created = Product.objects.update_or_create(
@@ -50,13 +46,13 @@ class ProductAdmin(admin.ModelAdmin):
                         }
                     )
 
-                # TODO: HW create file_import object in db (file path)
-
-                # TODO: HW make celery task (file_import.id)
-
                 # save result info into file_import
 
+                # TODO: HW <--- make celery task
+
                 # todo: use messages with result
+
+                messages.add_message(request, messages.ERROR, "Hello world.")
 
         return render(request, 'admin/product/product_import.html', {'form': form, 'result': result})
 
