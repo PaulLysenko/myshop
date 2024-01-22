@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 
 from celery_app import celery_app
 from apps.account.models import RegTry
-from apps.account.bl import save_file_to_storage
+from apps.product.bl import save_file_to_storage
 
 logger = logging.getLogger(__name__)
 
