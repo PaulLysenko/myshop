@@ -1,4 +1,5 @@
 from django.db import models
+from apps.account.models import RegTry
 
 
 class Brand(models.Model):
@@ -20,3 +21,14 @@ class Product(models.Model):
 
     def __str__(self):
         return f'{self.name}: {self.price}'
+
+
+class FileImport(models.Model):
+    created_at = models.DateTimeField(auto_now=True, auto_created=True)
+    approved = models.DecimalField(max_digits=10, decimal_places=2)
+    recorded = models.DecimalField(max_digits=10, decimal_places=2)
+    rejected = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f'{self.admin_name}:{self.created_at}:{self.approved}:{self.rejected}:{self.recorded}'
+

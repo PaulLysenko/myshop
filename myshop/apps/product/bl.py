@@ -1,16 +1,18 @@
 from decimal import Decimal
+import os
+from datetime import datetime
 import pandas
 from django.conf import settings
 from apps.product.constants import IMPORTED_FILE_PATH
 
 
 def save_file_to_storage(imported_file):
-    # todo HW: add import time to path
-    # like 18_12_2024_20_10_35_myshop1.xlsx
+    timestamp = datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
+    filename, file_extension = os.path.splitext(imported_file.name)
+    new_filename = f"{timestamp}_{filename}{file_extension}"
 
-    file_path = IMPORTED_FILE_PATH.format(settings.BASE_DIR, imported_file.name)
+    file_path = IMPORTED_FILE_PATH.format(settings.BASE_DIR, new_filename)
 
-    # save imported file to the hard drive
     with open(file_path, 'wb') as saved_file:
         saved_file.write(imported_file.read())
 
