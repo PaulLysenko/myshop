@@ -13,8 +13,8 @@ class SearchForm(forms.Form):
     )
 
 
-class ProductToCartForm(forms.Form):
-    pass
+# class ProductToCartForm(forms.Form):
+#     pass
 
 
 class ProductImportForm(forms.Form):

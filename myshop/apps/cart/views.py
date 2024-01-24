@@ -1,8 +1,7 @@
+from django.views import View
 from django.shortcuts import render, redirect
 
 from apps.cart.models import Cart, CartItem
-from django.views import View
-
 from apps.product.models import Product
 
 
@@ -22,7 +21,7 @@ class AddCartView(View):
     template = 'view_cart.html'
 
     def post(self, request, product_id):
-        cart, _ = Cart.objects.get_or_create(
+        cart, _created = Cart.objects.get_or_create(
             user_id=request.user.id,
             finalizing_time__isnull=True,
         )

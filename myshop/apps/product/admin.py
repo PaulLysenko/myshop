@@ -4,9 +4,9 @@ from django.shortcuts import render
 from django.contrib import messages
 
 from apps.product.forms import ProductImportForm
-from apps.product.models import Product
-from apps.product.models import Brand
+from apps.product.models import Product, Brand, FileImport
 from apps.product.bl import save_file_to_storage, parse_xlsx_file
+from apps.product.tasks import saving_product_list_task
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -24,6 +24,8 @@ class ProductAdmin(admin.ModelAdmin):
 
                 path = save_file_to_storage(file)
 
+                file_import = FileImport.objects.create(user=request.user, file_path=path, )
+
                 # TODO: HW create file_import object in db (file path)
 
                 # TODO: HW make celery task (file_import.id) ---> into celery
@@ -32,27 +34,15 @@ class ProductAdmin(admin.ModelAdmin):
 
                 product_data_list = parse_xlsx_file(path)
 
-                # validate data
+                file_import.count_new(product_data_list=product_data_list)
 
-                for product_data in product_data_list:
-                    product, created = Product.objects.update_or_create(
-                        name=product_data['name'],
-                        defaults={
-                            'price': product_data['price'],
-                            'description': product_data['description'],
-                            'brand': Brand.objects.filter(
-                                name__iexact=product_data['brand'].lower(),
-                            ).last() or None,
-                        }
-                    )
-
-                # save result info into file_import
-
-                # TODO: HW <--- make celery task
+                saving_product_list_task.delay(product_data_list=product_data_list)
 
                 # todo: use messages with result
 
-                messages.add_message(request, messages.ERROR, "Hello world.")
+                messages.add_message(request, messages.INFO, f"""Success! 
+                {file_import.quantity_new} new products were added
+                {file_import.quantity_updated} old products were updated""")
 
         return render(request, 'admin/product/product_import.html', {'form': form, 'result': result})
 
@@ -71,6 +61,11 @@ class ProductAdmin(admin.ModelAdmin):
 
 class BrandAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'country']
+
+
+@admin.register(FileImport)
+class FileImportAdmin(admin.ModelAdmin):
+    pass
 
 
 admin.site.register(Product, ProductAdmin)

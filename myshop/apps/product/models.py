@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -7,7 +8,7 @@ class Brand(models.Model):
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return str(self.name)
+        return self.name
 
 
 class Product(models.Model):
@@ -20,3 +21,22 @@ class Product(models.Model):
 
     def __str__(self):
         return f'{self.name}: {self.price}'
+
+
+class FileImport(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin_user')
+    creation_time = models.DateTimeField(auto_now=True)
+    file_path = models.CharField(max_length=256, unique=True)
+    quantity_new = models.PositiveIntegerField(default=0)
+    quantity_updated = models.PositiveIntegerField(default=0)
+
+    def count_new(self, product_data_list):
+        for product_data in product_data_list:
+            if Product.objects.filter(name__iexact=product_data['name'].lower()):
+                self.quantity_updated += 1
+            else:
+                self.quantity_new += 1
+        return self.save()
+
+    def __str__(self):
+        return f'{str(self.user)}: {self.file_path} - {self.creation_time.strftime("%d-%m-%Y %H:%M:%S")}'
