@@ -2,11 +2,10 @@ from decimal import Decimal
 import pandas
 from django.conf import settings
 from apps.product.constants import IMPORTED_FILE_PATH
+from apps.product.models import FileImport
 
 
 def save_file_to_storage(imported_file):
-    # todo HW: add import time to path
-    # like 18_12_2024_20_10_35_myshop1.xlsx
 
     file_path = IMPORTED_FILE_PATH.format(settings.BASE_DIR, imported_file.name)
 

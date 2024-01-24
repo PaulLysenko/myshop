@@ -1,4 +1,5 @@
 import logging
+
 from django.core import mail
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -7,13 +8,11 @@ from django.contrib.auth.models import User
 from celery_app import celery_app
 from apps.account.models import RegTry
 
-
 logger = logging.getLogger(__name__)
 
 
 @celery_app.task
 def send_email_task(otc, email):
-
     context = {
         'link': f'http://{settings.HOST_NAME}/registration/{otc}',
 
@@ -32,7 +31,7 @@ def send_email_task(otc, email):
     logger.info(f'Send email to {mail_data["recipient_list"]}')
     try:
         mail.send_mail(**mail_data)
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         logger.error(f'Error email sending: {e}')
 
 

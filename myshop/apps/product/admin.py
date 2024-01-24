@@ -7,6 +7,7 @@ from apps.product.forms import ProductImportForm
 from apps.product.models import Product
 from apps.product.models import Brand
 from apps.product.bl import save_file_to_storage, parse_xlsx_file
+from apps.product.tasks import parsing_file
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -22,7 +23,7 @@ class ProductAdmin(admin.ModelAdmin):
             if form.is_valid():
                 file = form.cleaned_data["file"]
 
-                path = save_file_to_storage(file)
+                path = parsing_file(save_file_to_storage(file))
 
                 # TODO: HW create file_import object in db (file path)
 
