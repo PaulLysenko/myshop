@@ -40,4 +40,6 @@ class AddCartView(View):
             cart_item.quantity += 1
             cart_item.save()
 
-        return redirect('view_cart')
+        cart_item.get_item_price()
+
+        return redirect('products')

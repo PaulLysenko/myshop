@@ -9,6 +9,23 @@
           integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 
 </head>
+
+<style>
+    a {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+
+    a:hover {
+        background-color: #0056b3;
+    }
+
+</style>
 <body class="d-flex flex-column min-vh-100">
 {% block header %}
 <div class="d-flex flex-column bd-highlight mb-3 p-3 text-center bg-primary">
@@ -27,6 +44,7 @@
             {% if user.is_authenticated %}
                 <li><a href="{% url 'auth-logout' %}">Logout</a></li>
                 <li><a href="{% url 'products' %}">Products</a></li>
+                <li><a href="{% url 'view_cart' %}">Your cart</a></li>
             {% else %}
                 <li><a href="{% url 'registration_try' %}">Registration</a> / <a href="{% url 'auth-login' %}">Login</a></li>
             {% endif %}

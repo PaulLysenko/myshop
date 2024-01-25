@@ -8,6 +8,11 @@ class CartItem(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     cart = models.ForeignKey('cart.Cart', on_delete=models.CASCADE, related_name='items')
 
+    def get_item_price(self):
+        self.price = self.product.price * self.quantity
+        self.save()
+        return self.price
+
     def __str__(self):
         return f'{str(self.product)} - {self.quantity} - {str(self.cart)}'
 
@@ -29,3 +34,8 @@ class Cart(models.Model):
             total += item.price * item.quantity
 
         return total
+
+    @property
+    def get_amount(self):
+        amount = sum([item.quantity for item in self.items.all()])
+        return amount

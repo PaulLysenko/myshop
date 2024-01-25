@@ -26,10 +26,6 @@ class ProductAdmin(admin.ModelAdmin):
 
                 file_import = FileImport.objects.create(user=request.user, file_path=path, )
 
-                # TODO: HW create file_import object in db (file path)
-
-                # TODO: HW make celery task (file_import.id) ---> into celery
-
                 # get file_import by id
 
                 product_data_list = parse_xlsx_file(path)
@@ -40,7 +36,7 @@ class ProductAdmin(admin.ModelAdmin):
 
                 # todo: use messages with result
 
-                messages.add_message(request, messages.INFO, f"""Success! 
+                messages.add_message(request, messages.SUCCESS, f"""Success! 
                 {file_import.quantity_new} new products were added
                 {file_import.quantity_updated} old products were updated""")
 
