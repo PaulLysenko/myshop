@@ -6,7 +6,8 @@ from django.contrib import messages
 from apps.product.forms import ProductImportForm
 from apps.product.models import Product
 from apps.product.models import Brand
-from apps.product.bl import save_file_to_storage, parse_xlsx_file
+from apps.product.bl import parse_xlsx_file, save_file_to_storage
+from apps.product.tasks import parsing_file
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -22,17 +23,9 @@ class ProductAdmin(admin.ModelAdmin):
             if form.is_valid():
                 file = form.cleaned_data["file"]
 
-                path = save_file_to_storage(file)
-
-                # TODO: HW create file_import object in db (file path)
-
-                # TODO: HW make celery task (file_import.id) ---> into celery
-
-                # get file_import by id
+                path = parsing_file(save_file_to_storage(file))
 
                 product_data_list = parse_xlsx_file(path)
-
-                # validate data
 
                 for product_data in product_data_list:
                     product, created = Product.objects.update_or_create(
