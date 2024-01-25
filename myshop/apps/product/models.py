@@ -20,3 +20,15 @@ class Product(models.Model):
 
     def __str__(self):
         return f'{self.name}: {self.price}'
+
+
+class FileImport(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    create_time = models.DateTimeField(auto_now=True, auto_created=True)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        current_datetime = self.create_time.datetime.datetime.now()
+        return f'{current_datetime.strftime("%d_%m_%Y_%H_%M_%S_")}{self.name}.xlsx'
+
+
