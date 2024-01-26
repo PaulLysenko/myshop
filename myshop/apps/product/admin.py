@@ -97,6 +97,6 @@ admin.site.register(Brand, BrandAdmin)
 
 
 class FileImportAdmin(admin.ModelAdmin):
-    list_display = ['id', 'created_at', 'approved', 'rejected', 'recorded']
+    list_display = ['id', 'name', 'created_at', 'approved', 'rejected', 'recorded']
 
 admin.site.register(FileImport, FileImportAdmin)

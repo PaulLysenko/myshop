@@ -1,5 +1,5 @@
 from django.db import models
-from apps.account.models import RegTry
+from django.contrib.auth.models import User
 
 
 class Brand(models.Model):
@@ -24,6 +24,7 @@ class Product(models.Model):
 
 
 class FileImport(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin_user')
     created_at = models.DateTimeField(auto_now=True, auto_created=True)
     approved = models.DecimalField(max_digits=10, decimal_places=2)
     recorded = models.DecimalField(max_digits=10, decimal_places=2)
