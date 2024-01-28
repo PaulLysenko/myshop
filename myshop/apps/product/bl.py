@@ -1,5 +1,3 @@
-import pandas
-from decimal import Decimal
 from datetime import datetime
 
 from django.conf import settings
@@ -16,13 +14,3 @@ def save_file_to_storage(imported_file):
         saved_file.write(imported_file.read())
 
     return file_path
-
-
-def parse_xlsx_file(file_path: str) -> list[dict[str, Decimal | str]]:
-
-    pd_dataframe = pandas.read_excel(file_path)
-    # check headers
-    # normalize data
-
-    result = pd_dataframe.to_dict(orient='records')
-    return result

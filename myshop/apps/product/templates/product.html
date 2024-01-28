@@ -2,18 +2,18 @@
 {% block body %}
 
     <div>
-        <h1 style="font-style: italic">Product specification</h1>
+        <h1 style="font-style: italic">Product specification:</h1>
 
         <p>Name: {{ product.name }}</p>
         <p>Price: {{ product.price }}</p>
         <p>Description: {{ product.description }}</p>
-        <p>Brand: {{ product.brand }}</p>
-
-        <form method="POST" action="{% url 'add_to_cart' product_id %}">
+        {% if product.brand %}
+        <p>Brand: <a href="{% url 'brand' product.brand.id %}">{{ product.brand }}</a></p>
+        {% endif %}
+        <form method="POST" action="{% url 'add_to_cart' product_id %}" target="_blank">
             {% csrf_token %}
-            <input class="btn btn-primary" type="submit" value="Add to chart">
+            <button>Add to cart</button>
         </form>
-
     </div>
 
 {% endblock %}

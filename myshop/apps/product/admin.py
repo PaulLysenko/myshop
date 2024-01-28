@@ -5,7 +5,7 @@ from django.contrib import messages
 
 from apps.product.forms import ProductImportForm
 from apps.product.models import Product, Brand, FileImport
-from apps.product.bl import save_file_to_storage, parse_xlsx_file
+from apps.product.bl import save_file_to_storage
 from apps.product.tasks import saving_product_list_task
 
 
@@ -22,23 +22,13 @@ class ProductAdmin(admin.ModelAdmin):
             if form.is_valid():
                 file = form.cleaned_data["file"]
 
-                path = save_file_to_storage(file)
+                file_import = FileImport.objects.create(user=request.user, file_path=save_file_to_storage(file))
 
-                file_import = FileImport.objects.create(user=request.user, file_path=path, )
-
-                # get file_import by id
-
-                product_data_list = parse_xlsx_file(path)
-
-                file_import.count_new(product_data_list=product_data_list)
-
-                saving_product_list_task.delay(product_data_list=product_data_list)
+                saving_product_list_task.delay(file_import_id=file_import.id)
 
                 # todo: use messages with result
 
-                messages.add_message(request, messages.SUCCESS, f"""Success! 
-                {file_import.quantity_new} new products were added
-                {file_import.quantity_updated} old products were updated""")
+                messages.add_message(request, messages.SUCCESS, f"File Saved!")
 
         return render(request, 'admin/product/product_import.html', {'form': form, 'result': result})
 

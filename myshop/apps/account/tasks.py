@@ -5,6 +5,7 @@ from django.template.loader import render_to_string
 from django.contrib.auth.models import User
 
 from celery_app import celery_app
+
 from apps.account.models import RegTry
 
 
@@ -26,8 +27,8 @@ def send_email_task(otc, email):
         'html_message': render_to_string('registration_confirm.html', context=context),
     }
 
-    # send_email_task.delay(**mail_data)
-    print(f'Success {context["link"]}')
+    send_email_task.delay(**mail_data)
+    logger.info(f'Success {context["link"]}')
 
     logger.info(f'Send email to {mail_data["recipient_list"]}')
     try:

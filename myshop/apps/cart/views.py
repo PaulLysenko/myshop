@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.views import View
 from django.shortcuts import render, redirect
 
@@ -21,7 +22,7 @@ class AddCartView(View):
     template = 'view_cart.html'
 
     def post(self, request, product_id):
-        cart, _created = Cart.objects.get_or_create(
+        cart, _ = Cart.objects.get_or_create(
             user_id=request.user.id,
             finalizing_time__isnull=True,
         )
@@ -33,13 +34,12 @@ class AddCartView(View):
             cart_id=cart.id,
             defaults={
                 'quantity': 1,
-                'price': product.price,
             }
         )
         if not created:
             cart_item.quantity += 1
             cart_item.save()
 
-        cart_item.get_item_price()
+        messages.add_message(request, messages.SUCCESS, f"{product.name} was added to cart!")
 
         return redirect('products')

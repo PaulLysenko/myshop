@@ -25,6 +25,50 @@
         background-color: #0056b3;
     }
 
+    button {
+    padding: 8px 16px;
+    background-color: #ff4500;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #d13800;
+    }
+
+    .messages {
+        margin: 1em 0;
+        padding: 1em;
+        border: 1px solid #dce1e7;
+        background-color: #f5f8fa;
+    }
+
+    .messages .success {
+        color: #155724;
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+    }
+
+    .messages .info {
+        color: #0c5460;
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+    }
+
+    .messages .warning {
+        color: #856404;
+        background-color: #fff3cd;
+        border-color: #ffeeba;
+    }
+
+    .messages .error {
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+    }
+
 </style>
 <body class="d-flex flex-column min-vh-100">
 {% block header %}
@@ -34,6 +78,16 @@
     </h1>
 </div>
 {% endblock %}
+
+{% block messages %}
+  {% if messages %}
+    <ul class="messagelist">{% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+    {% endfor %}</ul>
+  {% endif %}
+{% endblock messages %}
+
+
 
  <aside>
         <span class="logo">MyShop</span>
