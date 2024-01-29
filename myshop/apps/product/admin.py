@@ -2,11 +2,21 @@ from django.contrib import admin
 from django.urls import re_path
 from django.shortcuts import render
 from django.contrib import messages
+import datetime
 
 from apps.product.forms import ProductImportForm
 from apps.product.models import Product
 from apps.product.models import Brand
-from apps.product.bl import parsing_file, parse_xlsx_file
+from apps.product.bl import save_file_to_storage, parse_xlsx_file
+from .models import FileImport
+
+
+def is_approved(product_data):
+    return product_data.get('approved', 0)
+
+
+def is_rejected(product_data):
+    return product_data.get('rejected', 0)
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -22,17 +32,16 @@ class ProductAdmin(admin.ModelAdmin):
             if form.is_valid():
                 file = form.cleaned_data["file"]
 
-                path = parsing_file(save_file_to_storage(file))
+                current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                file_name = f"import_file_{current_time}.xlsx"
 
-                # TODO: HW create file_import object in db (file path)
+                path = save_file_to_storage(file)
 
-                # TODO: HW make celery task (file_import.id) ---> into celery
-
-                # get file_import by id
 
                 product_data_list = parse_xlsx_file(path)
 
-                # validate data
+                file_import = FileImport.objects.create()
+
 
                 for product_data in product_data_list:
                     product, created = Product.objects.update_or_create(
@@ -46,12 +55,12 @@ class ProductAdmin(admin.ModelAdmin):
                         }
                     )
 
-                # save result info into file_import
-
-                # TODO: HW <--- make celery task
-
-                # todo: use messages with result
-
+                file_import.approved = len(
+                    [product_data for product_data in product_data_list if is_approved(product_data)])
+                file_import.rejected = len(
+                    [product_data for product_data in product_data_list if is_rejected(product_data)])
+                file_import.recorded = len(product_data_list) - file_import.approved - file_import.rejected
+                file_import.save()
                 messages.add_message(request, messages.ERROR, "Hello world.")
 
         return render(request, 'admin/product/product_import.html', {'form': form, 'result': result})
@@ -75,3 +84,10 @@ class BrandAdmin(admin.ModelAdmin):
 
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Brand, BrandAdmin)
+
+
+class FileImportAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'created_at', 'approved', 'rejected', 'recorded']
+
+
+admin.site.register(FileImport, FileImportAdmin)

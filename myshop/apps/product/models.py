@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Brand(models.Model):
@@ -23,12 +24,12 @@ class Product(models.Model):
 
 
 class FileImport(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
-    create_time = models.DateTimeField(auto_now=True, auto_created=True)
-    name = models.CharField(max_length=100)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin_user')
+    created_at = models.DateTimeField(auto_now=True, auto_created=True)
+    approved = models.BooleanField(default=False)
+    recorded = models.BooleanField(default=False)
+    rejected = models.BooleanField(default=False)
 
     def __str__(self):
-        current_datetime = self.create_time.datetime.datetime.now()
-        return f'{current_datetime.strftime("%d_%m_%Y_%H_%M_%S_")}{self.name}.xlsx'
-
+        return f'{self.admin_name}:{self.created_at}:{self.approved}:{self.rejected}:{self.recorded}'
 
