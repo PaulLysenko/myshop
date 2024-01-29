@@ -43,3 +43,18 @@ class AddCartView(View):
         messages.add_message(request, messages.SUCCESS, f"{product.name} was added to cart!")
 
         return redirect('products')
+
+
+class RemoveFromCartView(View):
+    def post(self, request, cart_item_id):
+        cart_item = CartItem.objects.get(id=cart_item_id)
+        if cart_item.quantity > 0:
+            cart_item.quantity -= 1
+        else:
+            cart_item.delete()
+
+        cart_item.save()
+
+        messages.add_message(request, messages.INFO, f"{cart_item.product.name} was removed from cart!")
+
+        return redirect('view_cart')

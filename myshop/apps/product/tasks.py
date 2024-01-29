@@ -24,19 +24,27 @@ def saving_product_list_task(file_import_id):
         })
 
     for product_data in product_data_list:
-        product, created = Product.objects.update_or_create(
-            name=product_data['name'],
-            defaults={
-                'price': product_data['price'],
-                'description': product_data['description'],
-                'brand': Brand.objects.filter(
-                    name__iexact=product_data['brand'].lower(),
-                ).last() or None,
-            }
-        )
-        if created:
-            file_import.quantity_new += 1
-        else:
-            file_import.quantity_updated += 1
-
+        try:
+            product, created = Product.objects.update_or_create(
+                name=product_data['name'],
+                defaults={
+                    'price': product_data['price'],
+                    'description': product_data['description'],
+                    'brand': Brand.objects.filter(
+                        name__iexact=product_data['brand'].lower(),
+                    ).last() or None,
+                }
+            )
+            if created:
+                file_import.quantity_new += 1
+            else:
+                file_import.quantity_updated += 1
+        except Exception as e:
+            file_import.errors.append({
+                'error': e
+            })
+    if not file_import.errors:
+        file_import.status = 10
+    else:
+        file_import.status = 20
     file_import.save()

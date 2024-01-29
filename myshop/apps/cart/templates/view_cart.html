@@ -67,7 +67,12 @@
                 <div class="num"><p>{{ item.quantity }}</p></div>
                 <div class="p-price"><p>${{ item.product.price }}</p></div>
                 <div class="price"><p>${{ item.item_total_price }}</p></div>
-                <div class="actions"><button>Remove from cart</button></div>
+                <div class="actions">
+                    <form method="POST" action="{% url 'remove_from_cart' item.id %}" target="_blank">
+                        {% csrf_token %}
+                        <button>Remove from cart</button>
+                    </form>
+                </div>
             </div>
         {% endfor %}
     </div>
