@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+from apps.product.constants import FileImportStatus
+
 
 class Brand(models.Model):
     name = models.CharField(max_length=100)
@@ -33,7 +35,7 @@ class FileImport(models.Model):
     file_path = models.CharField(max_length=256, unique=True)
     quantity_new = models.PositiveIntegerField(default=0)
     quantity_updated = models.PositiveIntegerField(default=0)
-    status = models.PositiveSmallIntegerField(default=0)     #  0: New, 10: Success, 20: Error (enum)
+    status = models.PositiveSmallIntegerField(default=FileImportStatus.NEW, choices=FileImportStatus.choices())
     errors = models.JSONField(default=error_list_default)
 
     def __str__(self):
