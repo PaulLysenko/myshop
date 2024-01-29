@@ -48,12 +48,11 @@ class AddCartView(View):
 class RemoveFromCartView(View):
     def post(self, request, cart_item_id):
         cart_item = CartItem.objects.get(id=cart_item_id)
-        if cart_item.quantity > 0:
+        if cart_item.quantity > 1:
             cart_item.quantity -= 1
+            cart_item.save()
         else:
             cart_item.delete()
-
-        cart_item.save()
 
         messages.add_message(request, messages.INFO, f"{cart_item.product.name} was removed from cart!")
 

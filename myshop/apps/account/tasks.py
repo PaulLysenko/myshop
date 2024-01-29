@@ -27,7 +27,6 @@ def send_email_task(otc, email):
         'html_message': render_to_string('registration_confirm.html', context=context),
     }
 
-    send_email_task.delay(**mail_data)
     logger.info(f'Success {context["link"]}')
 
     logger.info(f'Send email to {mail_data["recipient_list"]}')
