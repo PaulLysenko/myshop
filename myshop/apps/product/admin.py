@@ -24,7 +24,8 @@ class ProductAdmin(admin.ModelAdmin):
 
                 file_import = FileImport.objects.create(user=request.user, file_path=save_file_to_storage(file))
 
-                saving_product_list_task.delay(file_import_id=file_import.id)
+                # saving_product_list_task.delay(file_import_id=file_import.id)
+                saving_product_list_task(file_import_id=file_import.id)
 
                 # todo: use messages with result
 

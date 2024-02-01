@@ -1,10 +1,12 @@
 from decimal import Decimal
 from typing import Annotated
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class ProductSchema(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
     name: str
     price: Annotated[Decimal, Field(decimal_places=2, max_digits=12)]
     description: str = ''
