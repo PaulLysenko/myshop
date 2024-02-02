@@ -1,5 +1,7 @@
+from django.contrib.auth.models import User
 from django.db import models
-from apps.account.models import RegTry
+
+from apps.product.constants import FileImportStatus
 
 
 class Brand(models.Model):
@@ -8,7 +10,7 @@ class Brand(models.Model):
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return str(self.name)
+        return self.name
 
 
 class Product(models.Model):
@@ -23,12 +25,18 @@ class Product(models.Model):
         return f'{self.name}: {self.price}'
 
 
+def error_list_default():
+    return []
+
+
 class FileImport(models.Model):
-    created_at = models.DateTimeField(auto_now=True, auto_created=True)
-    approved = models.DecimalField(max_digits=10, decimal_places=2)
-    recorded = models.DecimalField(max_digits=10, decimal_places=2)
-    rejected = models.DecimalField(max_digits=10, decimal_places=2)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin_user')
+    creation_time = models.DateTimeField(auto_now=True)
+    file_path = models.CharField(max_length=256, unique=True)
+    quantity_new = models.PositiveIntegerField(default=0)
+    quantity_updated = models.PositiveIntegerField(default=0)
+    status = models.PositiveSmallIntegerField(default=FileImportStatus.NEW, choices=FileImportStatus.choices())
+    errors = models.JSONField(default=error_list_default)
 
     def __str__(self):
-        return f'{self.admin_name}:{self.created_at}:{self.approved}:{self.rejected}:{self.recorded}'
-
+        return f'{str(self.user)}: {self.file_path} - {self.creation_time.strftime("%d-%m-%Y %H:%M:%S")}'

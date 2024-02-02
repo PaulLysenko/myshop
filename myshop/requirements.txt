@@ -8,3 +8,4 @@ redis==5.0.1
 pylint==3.0.3
 pandas==2.1.4
 openpyxl==3.1.2
+pydantic==2.6.0
