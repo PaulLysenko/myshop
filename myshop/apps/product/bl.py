@@ -6,11 +6,10 @@ from apps.product.constants import IMPORTED_FILE_PATH
 
 
 def save_file_to_storage(imported_file):
-
-    file_path = IMPORTED_FILE_PATH.format(settings.BASE_DIR, datetime.now().strftime("%Y_%m_%d-%H_%M_%S"), imported_file.name)
-
+    file_path = IMPORTED_FILE_PATH.format(datetime.now().strftime("%Y_%m_%d-%H_%M_%S"), imported_file.name)
+    abs_file_path = str(settings.BASE_DIR) + file_path
     # save imported file to the hard drive
-    with open(file_path, 'wb') as saved_file:
+    with open(abs_file_path, 'wb') as saved_file:
         saved_file.write(imported_file.read())
 
     return file_path

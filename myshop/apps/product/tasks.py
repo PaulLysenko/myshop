@@ -1,13 +1,12 @@
 import logging
 
 import pandas
-from django.forms import ModelForm
 
-from apps.product.bl import normalise_dataframe
+from django.conf import settings
 
-ModelForm
 from celery_app import celery_app
 
+from apps.product.bl import normalise_dataframe
 from apps.product.constants import FileImportStatus
 from apps.product.models import Product, Brand, FileImport
 from apps.product.product_schemas import ProductSchema
@@ -19,8 +18,9 @@ logger = logging.getLogger(__name__)
 @celery_app.task
 def saving_product_list_task(file_import_id):
     file_import = FileImport.objects.get(id=file_import_id)
+    file_path = str(settings.BASE_DIR) + '/myshop/' + file_import.file_path
     try:
-        pd_dataframe = pandas.read_excel(file_import.file_path)
+        pd_dataframe = pandas.read_excel(file_path)
     except Exception as e:
         file_import.errors.append({
             'error': repr(e)
@@ -85,8 +85,8 @@ def saving_product_list_task(file_import_id):
         else:
             file_import.quantity_updated += 1
 
-    if not file_import.errors:
-        file_import.status = FileImportStatus.SUCCESS
-    else:
-        file_import.status = FileImportStatus.ERROR
+    # if not file_import.errors:
+    #     file_import.status = FileImportStatus.SUCCESS
+    # else:
+    #     file_import.status = FileImportStatus.ERROR
     file_import.save()
