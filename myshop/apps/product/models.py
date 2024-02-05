@@ -18,7 +18,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     created_at = models.DateTimeField(auto_now=True, auto_created=True)
     description = models.TextField(null=True, blank=True)
-    brand = models.ForeignKey(Brand, related_name='products', on_delete=models.CASCADE, null=True)
+    brand = models.ForeignKey(Brand, related_name='products', on_delete=models.CASCADE, null=True, blank=True)
     is_hidden = models.BooleanField(default=False)
 
     def __str__(self):

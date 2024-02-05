@@ -1,5 +1,7 @@
 from django import forms
 
+from apps.product.models import Product
+
 
 class SearchForm(forms.Form):
     search = forms.CharField(
@@ -29,3 +31,10 @@ class ProductImportForm(forms.Form):
             raise forms.ValidationError('Not an .xlsx file')
 
         return value
+
+
+# form example
+class ProductValidationForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ['name', 'price', 'description', 'brand']

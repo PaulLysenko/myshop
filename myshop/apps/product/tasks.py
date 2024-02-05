@@ -6,7 +6,7 @@ from django.conf import settings
 
 from celery_app import celery_app
 
-from apps.product.bl import normalise_dataframe
+from apps.product.bl import normalise_dataframe, product_data_validation, form_product_data_validation
 from apps.product.constants import FileImportStatus
 from apps.product.models import Product, Brand, FileImport
 from apps.product.product_schemas import ProductSchema
@@ -44,29 +44,8 @@ def saving_product_list_task(file_import_id):
     if file_import.errors:
         return
 
-    # form example
-    # class ProductValidationForm(ModelForm):
-    #     class Meta:
-    #         model = Product
-    #         fields = ['name', 'price', 'description']
-
-    # Todo HW: make it function ->
-
-    product_data_list: list[dict] = pd_dataframe.to_dict(orient='records')
-    products: list[dict] = []
-
-    for product in product_data_list:
-        try:
-            products.append(ProductSchema(**product).model_dump())
-        except Exception as e:
-            file_import.errors.append({
-                'error': repr(e),
-            })
-            file_import.status = FileImportStatus.ERROR
-            file_import.save()
-            continue
-
-    # Todo HW: <- make it function
+    # products = product_data_validation(pd_dataframe, file_import_id)
+    products = form_product_data_validation(pd_dataframe, file_import_id)
 
     for product_data in products:
         product, created = Product.objects.update_or_create(
