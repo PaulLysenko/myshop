@@ -23,6 +23,7 @@ from .views import HomeView
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
+    # path('api/', include('apps.api.urls')),
     path('admin/', admin.site.urls),
     path('products/', include('apps.product.urls')),
     path('registration/', include('apps.account.urls')),
