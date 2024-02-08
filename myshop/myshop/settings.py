@@ -49,11 +49,13 @@ INSTALLED_APPS = [
 
     # external libraries
     'pydantic',
+    'rest_framework',
 
     # product apps
     'apps.product',
     'apps.account',
     'apps.cart',
+    'apps.api',
 ]
 
 MIDDLEWARE = [
@@ -174,6 +176,14 @@ CELERY_BEAT_SCHEDULE = {
     #     'schedule': crontab(minute='*/1'),
     #     # 'schedule': timedelta(minutes=5),
     # },
+}
+
+
+# DRF
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
 }
 
 
