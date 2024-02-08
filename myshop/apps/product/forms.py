@@ -15,10 +15,6 @@ class SearchForm(forms.Form):
     )
 
 
-# class ProductToCartForm(forms.Form):
-#     pass
-
-
 class ProductImportForm(forms.Form):
 
     file = forms.FileField()
@@ -37,4 +33,4 @@ class ProductImportForm(forms.Form):
 class ProductValidationForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'price', 'description', 'brand']
+        fields = ['name', 'price', 'description']
