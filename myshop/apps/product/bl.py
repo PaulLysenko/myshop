@@ -26,3 +26,21 @@ def normalise_dataframe(pd_dataframe, required_file_headers):
             pd_dataframe.drop(header, axis=1, inplace=True)
 
     return pd_dataframe
+
+# def validate_product_data_list(product_data_list):
+    #     errors = []
+    #
+    #     for product_data in product_data_list:
+    #         form = ProductValidationForm(product_data)
+    #
+    #         if form.is_valid():
+    #             validated_data = form.cleaned_data
+    #             products.append(ProductSchema(**validated_data).model_dump())
+    #         else:
+    #
+    #             errors.append({
+    #                 'product_data': product_data,
+    #                 'errors': form.errors,
+    #             })
+    #
+    #     return errors, products

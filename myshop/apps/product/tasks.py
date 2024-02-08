@@ -7,6 +7,7 @@ import pandas
 from django.forms import ModelForm
 
 from apps.product.bl import normalise_dataframe
+#from apps.product.bl import validate_product_data_list
 
 ModelForm
 from celery_app import celery_app
@@ -48,29 +49,7 @@ def saving_product_list_task(file_import_id):
     if file_import.errors:
         return
 
-    # form example
-    # class ProductValidationForm(ModelForm):
-    #     class Meta:
-    #         model = Product
-    #         fields = ['name', 'price', 'description']
 
-    # def validate_product_data_list(product_data_list):
-    #     errors = []
-    #
-    #     for product_data in product_data_list:
-    #         form = ProductValidationForm(product_data)
-    #
-    #         if form.is_valid():
-    #             validated_data = form.cleaned_data
-    #             products.append(ProductSchema(**validated_data).model_dump())
-    #         else:
-    #
-    #             errors.append({
-    #                 'product_data': product_data,
-    #                 'errors': form.errors,
-    #             })
-    #
-    #     return errors, products
     #
     # product_data_list = pd_dataframe.to_dict(orient='records')
     # products = []

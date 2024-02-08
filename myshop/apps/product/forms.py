@@ -1,6 +1,8 @@
 from django import forms
-from django.forms import ModelForm
+#from django.forms import ModelForm
 from pydantic import BaseModel, ValidationError, validator
+
+from apps.product.product_schemas import ProductValidationSchema
 
 from .models import Product
 
@@ -42,10 +44,10 @@ class ProductImportForm(forms.Form):
 #
 #     def valid_name(self):
 #         name = self.cleaned_data.get('name')
-#         self.cleaned_data['name'] = name.strip()
-#         self.cleaned_data['name'] = name.lower()
 #         if len(name) < 1:
 #             raise ValidationError("Name must be at least 1 characters long.")
+#         else:
+#             self.cleaned_data['name'] = name.lower().strip()
 #         return name
 #
 #     def valid_price(self):
@@ -63,32 +65,11 @@ class ProductImportForm(forms.Form):
 #         return description
 
 
-class ProductSchema(BaseModel):
-    name: str
-    price: float
-    description: str
-
-    @validator("name")
-    def validate_name(cls, value):
-        if len(value) < 1:
-            raise ValueError("Name must be at least 1 character long.")
-        return value
-
-    @validator("price")
-    def validate_price(cls, value):
-        if value <= 0:
-            raise ValueError("Price must be greater than 0.")
-        return value
-
-    @validator("description")
-    def validate_description(cls, value):
-        if len(value) < 1:
-            raise ValueError("Description must be at least 1 character long.")
-        return value
 
 def validate_product_data(product_data):
     try:
-        validated_product = ProductSchema(**product_data)
+        validated_product = ProductValidationSchema(**product_data)
         return None, validated_product.dict()
     except ValidationError as e:
         return e.errors(), None
+

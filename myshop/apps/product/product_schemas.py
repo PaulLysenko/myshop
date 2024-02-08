@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Annotated
 
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict, validator
 
 
 class ProductSchema(BaseModel):
@@ -22,3 +22,27 @@ class ProductSchema(BaseModel):
             raise ValueError('Name is too long')
 
         return value
+
+class ProductValidationSchema(BaseModel):
+    name: str
+    price: float
+    description: str
+
+    @validator("name")
+    def validate_name(cls, value):
+        if len(value) < 1:
+            raise ValueError("Name must be at least 1 character long.")
+        return value
+
+    @validator("price")
+    def validate_price(cls, value):
+        if value <= 0:
+            raise ValueError("Price must be greater than 0.")
+        return value
+
+    @validator("description")
+    def validate_description(cls, value):
+        if len(value) < 1:
+            raise ValueError("Description must be at least 1 character long.")
+        return value
+
