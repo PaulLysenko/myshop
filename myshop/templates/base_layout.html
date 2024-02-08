@@ -9,6 +9,73 @@
           integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 
 </head>
+
+<style>
+    a {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+
+    a:hover {
+        background-color: #0056b3;
+    }
+
+    button {
+    padding: 8px 16px;
+    background-color: #ff4500;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #d13800;
+    }
+
+    .messagelist {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .messagelist li {
+        border: 1px solid #d8d8d8;
+        border-radius: 5px;
+        margin: 0 0 5px 0;
+        padding: 10px;
+    }
+
+    .messagelist .success {
+        background: #dff0d8;
+        border-color: #d6e9c6;
+        color: #468847;
+    }
+
+    .messagelist .info {
+        background: #d9edf7;
+        border-color: #bce8f1;
+        color: #31708f;
+    }
+
+    .messagelist .warning {
+        background: #fcf8e3;
+        border-color: #faebcc;
+        color: #8a6d3b;
+    }
+
+    .messagelist .error {
+        background: #f2dede;
+        border-color: #ebccd1;
+        color: #a94442;
+    }
+
+</style>
 <body class="d-flex flex-column min-vh-100">
 {% block header %}
 <div class="d-flex flex-column bd-highlight mb-3 p-3 text-center bg-primary">
@@ -17,6 +84,16 @@
     </h1>
 </div>
 {% endblock %}
+
+{% block messages %}
+  {% if messages %}
+    <ul class="messagelist">{% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+    {% endfor %}</ul>
+  {% endif %}
+{% endblock messages %}
+
+
 
  <aside>
         <span class="logo">MyShop</span>
@@ -27,12 +104,21 @@
             {% if user.is_authenticated %}
                 <li><a href="{% url 'auth-logout' %}">Logout</a></li>
                 <li><a href="{% url 'products' %}">Products</a></li>
+                <li><a href="{% url 'view_cart' %}">Your cart</a></li>
             {% else %}
                 <li><a href="{% url 'registration_try' %}">Registration</a> / <a href="{% url 'auth-login' %}">Login</a></li>
             {% endif %}
         </ul>
     </aside>
 
+{#{% if messages %}#}
+{#    #}
+{#<ul class="messages">#}
+{#    {% for message in messages %}#}
+{#    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>#}
+{#    {% endfor %}#}
+{#</ul>#}
+{#{% endif %}#}
 
 <div class="mx-3 my-3">
     {% block body %}

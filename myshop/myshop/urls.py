@@ -19,10 +19,11 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 
-from apps.product import views
+from .views import HomeView
 
 urlpatterns = [
-    path('', views.HomeView.as_view(), name='home'),
+    path('', HomeView.as_view(), name='home'),
+    # path('api/', include('apps.api.urls')),
     path('admin/', admin.site.urls),
     path('products/', include('apps.product.urls')),
     path('registration/', include('apps.account.urls')),

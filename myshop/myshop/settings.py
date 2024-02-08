@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'celery_app',
 
     # external libraries
+    'pydantic',
 
     # product apps
     'apps.product',
@@ -96,7 +97,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'db_postgres',
-        # 'HOST': 'localhost',
+        # 'HOST': 'localhost',  # for local project run
         'PORT': '5432',
     },
 }

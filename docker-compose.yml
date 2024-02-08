@@ -8,6 +8,7 @@ services:
       - "8000:8000"  # local / container
     volumes:
         - .:/app
+        - xls-volume:/app/myshop/xlsx_files
     depends_on:
       - db_postgres
 
@@ -33,6 +34,7 @@ services:
     build:
       dockerfile: ./myshop/DockerfileCelery
     volumes:
+      - xls-volume:/app/myshop/xlsx_files
       - ./:/opt/celeryworker
     command: celery -A celery_app.celeryapp worker --concurrency 2 -l info
     depends_on:
@@ -63,3 +65,4 @@ services:
 
 volumes:
   postgres-db-volume:
+  xls-volume:

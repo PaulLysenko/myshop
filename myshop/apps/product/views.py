@@ -7,15 +7,10 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.generic import TemplateView
 from django.shortcuts import get_object_or_404
 
 from apps.product.models import Product, Brand
 from apps.product.forms import SearchForm
-
-
-class HomeView(TemplateView):
-    template_name = 'base_layout.html'
 
 
 class ProductsView(View):

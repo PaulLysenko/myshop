@@ -1,27 +1,27 @@
-from decimal import Decimal
-import os
 from datetime import datetime
-import pandas
+
 from django.conf import settings
+
 from apps.product.constants import IMPORTED_FILE_PATH
 
 
 def save_file_to_storage(imported_file):
-    timestamp = datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
-    filename, file_extension = os.path.splitext(imported_file.name)
-    new_filename = f"{timestamp}_{filename}{file_extension}"
-
-    file_path = IMPORTED_FILE_PATH.format(settings.BASE_DIR, new_filename)
-
-    with open(file_path, 'wb') as saved_file:
+    file_path = IMPORTED_FILE_PATH.format(datetime.now().strftime("%Y_%m_%d-%H_%M_%S"), imported_file.name)
+    abs_file_path = str(settings.BASE_DIR) + file_path
+    # save imported file to the hard drive
+    with open(abs_file_path, 'wb') as saved_file:
         saved_file.write(imported_file.read())
 
     return file_path
 
 
-def parse_xlsx_file(file_path: str) -> list[dict[str, Decimal | str]]:
+def normalise_dataframe(pd_dataframe, required_file_headers):
+    for header in pd_dataframe:
+        new_header = header.lower().strip()
+        if new_header != header and new_header in required_file_headers:
+            pd_dataframe.insert(0, new_header, getattr(pd_dataframe, header))
 
-    pd_dataframe = pandas.read_excel(file_path)
+        if header not in required_file_headers:
+            pd_dataframe.drop(header, axis=1, inplace=True)
 
-    result = pd_dataframe.to_dict(orient='records')
-    return result
+    return pd_dataframe

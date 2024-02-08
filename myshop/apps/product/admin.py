@@ -2,21 +2,11 @@ from django.contrib import admin
 from django.urls import re_path
 from django.shortcuts import render
 from django.contrib import messages
-import datetime
 
 from apps.product.forms import ProductImportForm
-from apps.product.models import Product
-from apps.product.models import Brand
-from apps.product.bl import save_file_to_storage, parse_xlsx_file
-from .models import FileImport
-
-
-def is_approved(product_data):
-    return product_data.get('approved', 0)
-
-
-def is_rejected(product_data):
-    return product_data.get('rejected', 0)
+from apps.product.models import Product, Brand, FileImport
+from apps.product.bl import save_file_to_storage
+from apps.product.tasks import saving_product_list_task
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -31,37 +21,12 @@ class ProductAdmin(admin.ModelAdmin):
             form = ProductImportForm(files=request.FILES)
             if form.is_valid():
                 file = form.cleaned_data["file"]
+                file_path = save_file_to_storage(file)
+                file_import = FileImport.objects.create(user=request.user, file_path=file_path)
 
-                current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-                file_name = f"import_file_{current_time}.xlsx"
+                saving_product_list_task.delay(file_import_id=file_import.id)
 
-                path = save_file_to_storage(file)
-
-
-                product_data_list = parse_xlsx_file(path)
-
-                file_import = FileImport.objects.create()
-
-
-                for product_data in product_data_list:
-                    product, created = Product.objects.update_or_create(
-                        name=product_data['name'],
-                        defaults={
-                            'price': product_data['price'],
-                            'description': product_data['description'],
-                            'brand': Brand.objects.filter(
-                                name__iexact=product_data['brand'].lower(),
-                            ).last() or None,
-                        }
-                    )
-
-                file_import.approved = len(
-                    [product_data for product_data in product_data_list if is_approved(product_data)])
-                file_import.rejected = len(
-                    [product_data for product_data in product_data_list if is_rejected(product_data)])
-                file_import.recorded = len(product_data_list) - file_import.approved - file_import.rejected
-                file_import.save()
-                messages.add_message(request, messages.ERROR, "Hello world.")
+                messages.add_message(request, messages.SUCCESS, f"File Saved!")
 
         return render(request, 'admin/product/product_import.html', {'form': form, 'result': result})
 
@@ -82,12 +47,10 @@ class BrandAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'country']
 
 
+@admin.register(FileImport)
+class FileImportAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(Product, ProductAdmin)
 admin.site.register(Brand, BrandAdmin)
-
-
-class FileImportAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'created_at', 'approved', 'rejected', 'recorded']
-
-
-admin.site.register(FileImport, FileImportAdmin)

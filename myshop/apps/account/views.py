@@ -1,15 +1,13 @@
 from django.contrib.auth.models import User
-
-from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+
 from apps.account.models import RegTry
 from apps.account.forms import RegTryForm, ValidateRegTryForm, LoginForm
-from django.contrib.auth import authenticate, login, logout
-
-from apps.account.tasks import send_email_task
-
-from .tasks import process_registration_task
+from apps.account.tasks import send_email_task, process_registration_task
 
 
 class RegTryView(View):
@@ -33,10 +31,10 @@ class RegTryView(View):
             return render(request, 'invalid_data.html', {'data': 'Email is not valid.'}, status=400)
 
         reg_try = RegTry.objects.create(email=email_value)
-        reg_try.send_registration_mail()
 
-        send_email_task.delay(reg_try.otc, reg_try.email)
+        send_email_task.delay(otc=reg_try.otc, email=reg_try.email)
 
+        messages.add_message(request, messages.INFO, f"Please check our email")
         return redirect(reverse('home'))
 
 
