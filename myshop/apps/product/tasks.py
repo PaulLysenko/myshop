@@ -66,7 +66,7 @@ def saving_product_list_task(file_import_id):
             file_import.quantity_new += 1
         else:
             file_import.quantity_updated += 1
-
-    if not file_import.errors:
-        file_import.status = FileImportStatus.SUCCESS
-    file_import.save()
+    #
+    # if not file_import.errors:
+    #     file_import.status = FileImportStatus.SUCCESS
+    # file_import.save()
