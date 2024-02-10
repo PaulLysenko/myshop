@@ -29,8 +29,7 @@ class ProductImportForm(forms.Form):
         return value
 
 
-# form example
 class ProductValidationForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'price', 'description']
+        fields = ['name', 'price', 'description', 'brand']

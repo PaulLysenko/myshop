@@ -6,7 +6,7 @@ from apps.product.constants import FileImportStatus
 
 class Brand(models.Model):
     name = models.CharField(max_length=100)
-    country = models.CharField(max_length=99)
+    country = models.CharField(max_length=99, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):

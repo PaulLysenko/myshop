@@ -1,4 +1,5 @@
 import logging
+import os
 
 import pandas
 
@@ -18,7 +19,9 @@ logger = logging.getLogger(__name__)
 @celery_app.task
 def saving_product_list_task(file_import_id):
     file_import = FileImport.objects.get(id=file_import_id)
+    # file_path = str(settings.BASE_DIR) + '/myshop/' + file_import.file_path
     file_path = str(settings.BASE_DIR) + file_import.file_path
+    # file_path = os.path.join(str(settings.BASE_DIR), 'myshop', file_import.file_path)
     try:
         pd_dataframe = pandas.read_excel(file_path)
     except Exception as e:
@@ -45,28 +48,10 @@ def saving_product_list_task(file_import_id):
         return
 
     product_data_list: list[dict] = normalized_pd_dataframe.to_dict(orient='records')
-    products: list[dict] = []
 
-    # products = schema_product_data_validation(product_data_list, products, file_import_id)
-    products = form_product_data_validation(product_data_list, products, file_import_id)
+    # products = schema_product_data_validation(product_data_list, file_import_id)
+    products = form_product_data_validation(product_data_list, file_import_id)
 
-    for product_data in products:
-        product, created = Product.objects.update_or_create(
-            name=product_data['name'],
-            defaults={
-                'price': product_data['price'],
-                'description': product_data['description'],
-                'brand': Brand.objects.filter(
-                    name__iexact=product_data['brand'].lower(),
-                ).last() or None,
-            },
-        )
-
-        if created:
-            file_import.quantity_new += 1
-        else:
-            file_import.quantity_updated += 1
-
-    if not file_import.errors:
-        file_import.status = FileImportStatus.SUCCESS
-    file_import.save()
+    # if not file_import.errors:
+    #     file_import.status = FileImportStatus.SUCCESS
+    #     file_import.save()
