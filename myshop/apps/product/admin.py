@@ -24,7 +24,7 @@ class ProductAdmin(admin.ModelAdmin):
                 file_path = save_file_to_storage(file)
                 file_import = FileImport.objects.create(user=request.user, file_path=file_path)
 
-                saving_product_list_task.delay(file_import_id=file_import.id)
+                saving_product_list_task(file_import_id=file_import.id)
 
                 messages.add_message(request, messages.SUCCESS, f"File Saved!")
 
