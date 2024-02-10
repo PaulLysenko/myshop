@@ -1,21 +1,23 @@
 from datetime import datetime
+from pathlib import PurePath
 
 from django.conf import settings
 
-from apps.product.constants import IMPORTED_FILE_PATH, FileImportStatus
+from apps.product.constants import IMPORTED_FILE_NAME, FileImportStatus, IMPORTED_FILE_DIRECTORY
 from apps.product.forms import ProductValidationForm
 from apps.product.models import FileImport, Product, Brand
 from apps.product.product_schemas import ProductSchema
 
 
 def save_file_to_storage(imported_file):
-    file_path = IMPORTED_FILE_PATH.format(datetime.now().strftime("%Y_%m_%d-%H_%M_%S"), imported_file.name)
-    abs_file_path = str(settings.BASE_DIR) + file_path
+    file_name = IMPORTED_FILE_NAME.format(datetime.now().strftime("%Y_%m_%d-%H_%M_%S"), imported_file.name)
+    abs_file_path = PurePath(settings.BASE_DIR, IMPORTED_FILE_DIRECTORY, file_name)
+
     # save imported file to the hard drive
     with open(abs_file_path, 'wb') as saved_file:
         saved_file.write(imported_file.read())
 
-    return file_path
+    return file_name
 
 
 def normalise_dataframe(pd_dataframe, required_file_headers):

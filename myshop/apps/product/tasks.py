@@ -1,5 +1,5 @@
 import logging
-import os
+from pathlib import PurePath
 
 import pandas
 
@@ -8,8 +8,8 @@ from django.conf import settings
 from celery_app import celery_app
 
 from apps.product.bl import normalise_dataframe, schema_product_data_validation, form_product_data_validation
-from apps.product.constants import FileImportStatus
-from apps.product.models import Product, Brand, FileImport
+from apps.product.constants import FileImportStatus, IMPORTED_FILE_DIRECTORY
+from apps.product.models import FileImport
 from apps.product.product_schemas import ProductSchema
 
 
@@ -19,9 +19,7 @@ logger = logging.getLogger(__name__)
 @celery_app.task
 def saving_product_list_task(file_import_id):
     file_import = FileImport.objects.get(id=file_import_id)
-    # file_path = str(settings.BASE_DIR) + '/myshop/' + file_import.file_path
-    file_path = str(settings.BASE_DIR) + file_import.file_path
-    # file_path = os.path.join(str(settings.BASE_DIR), 'myshop', file_import.file_path)
+    file_path = PurePath(settings.BASE_DIR, 'myshop', IMPORTED_FILE_DIRECTORY, file_import.file_path)
     try:
         pd_dataframe = pandas.read_excel(file_path)
     except Exception as e:

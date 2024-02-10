@@ -1,6 +1,7 @@
 from enum import IntEnum
 
-IMPORTED_FILE_PATH = '/xlsx_files/{}-{}'
+IMPORTED_FILE_NAME = '{}-{}'
+IMPORTED_FILE_DIRECTORY = 'xlsx_files'
 
 
 class FileImportStatus(IntEnum):

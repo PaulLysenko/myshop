@@ -21,10 +21,11 @@ class ProductAdmin(admin.ModelAdmin):
             form = ProductImportForm(files=request.FILES)
             if form.is_valid():
                 file = form.cleaned_data["file"]
-                file_path = save_file_to_storage(file)
-                file_import = FileImport.objects.create(user=request.user, file_path=file_path)
+                file_name = save_file_to_storage(file)
+                file_import = FileImport.objects.create(user=request.user, file_path=file_name)
 
-                saving_product_list_task(file_import_id=file_import.id)
+                # saving_product_list_task(file_import_id=file_import.id)
+                saving_product_list_task.delay(file_import_id=file_import.id)
 
                 messages.add_message(request, messages.SUCCESS, f"File Saved!")
 
