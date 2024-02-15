@@ -6,8 +6,7 @@ from django.contrib.auth.models import User
 
 from celery_app import celery_app
 
-from apps.account.models import RegTry
-
+from apps.account.models import RegTry, Profile
 
 logger = logging.getLogger(__name__)
 
@@ -46,5 +45,6 @@ def process_registration_task(data, reg_try_id):
         first_name=data['first_name'],
         last_name=data['last_name'],
     )
+    Profile.objects.create(user=user)
     reg_try.user = user
     reg_try.save()
