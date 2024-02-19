@@ -1,11 +1,12 @@
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.views import View
+from django.views.generic import TemplateView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
-from apps.account.models import RegTry
+from apps.account.models import RegTry, UserTwoFactorAuthData
 from apps.account.forms import RegTryForm, ValidateRegTryForm, LoginForm
 from apps.account.tasks import send_email_task, process_registration_task
 
@@ -109,3 +110,23 @@ class LogoutView(View):
             logout(request)
 
         return redirect(reverse('home'))
+
+
+class SetupTwoFactorAuthView(TemplateView):
+    template_name = "setup_2fa.html"
+
+    def post(self, request):
+        context = {}
+        user = request.user
+
+        user2fa_data, created = UserTwoFactorAuthData.objects.get_or_create(user=user)
+        context["is_created"] = created
+
+        if created:
+            context["otp_secret"] = user2fa_data.gauth_secret
+            context["qr_code"] = user2fa_data.generate_qr_code(
+                name=user.email,
+            )
+
+        return self.render_to_response(context)
+

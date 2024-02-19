@@ -1,4 +1,9 @@
 import uuid
+
+import pyotp
+import qrcode
+import qrcode.image.svg
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -19,3 +24,29 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
 
     api_key = models.UUIDField(default=uuid.uuid4, db_index=True)
+
+
+class UserTwoFactorAuthData(models.Model):
+    user = models.OneToOneField(
+        User,
+        related_name='two_factor_auth',
+        on_delete=models.CASCADE
+    )
+
+    gauth_secret = models.CharField(max_length=32, editable=False, default=pyotp.random_base32)
+
+    def generate_qr_code(self, name=None) -> str:
+        totp = pyotp.TOTP(self.gauth_secret)
+        qr_uri = totp.provisioning_uri(
+            name=name,
+            issuer_name='2FA Gauth for MyShop',
+        )
+
+        image_factory = qrcode.image.svg.SvgPathImage
+        qr_code_image = qrcode.make(
+            qr_uri,
+            image_factory=image_factory,
+        )
+
+        # The result is going to be an HTML <svg> tag
+        return qr_code_image.to_string().decode('utf_8')
