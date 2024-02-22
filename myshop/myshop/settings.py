@@ -66,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'myshop.custom_middleware.Custom2fAMiddleware',
 ]
 
 ROOT_URLCONF = 'myshop.urls'
@@ -98,8 +99,8 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': 'db_postgres',
-        # 'HOST': 'localhost',  # for local project run
+        # 'HOST': 'db_postgres',
+        'HOST': 'localhost',  # for local project run
         'PORT': '5432',
     },
 }
