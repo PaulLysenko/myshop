@@ -3,50 +3,15 @@ from decimal import Decimal
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.shortcuts import get_object_or_404
 
+from apps.account.views import auth2required
 from apps.product.models import Product, Brand
 from apps.product.forms import SearchForm
-from apps.account.models import UserTwoFactorAuthData
-
-
-def auth2required(foo):
-    def wrapper(request, *args, **kwargs):
-        # check user
-
-        if code := request.headers.get('AUTH2FA_CODE'):
-            user = request.user
-            auth2 = UserTwoFactorAuthData.objects.get(user_id=user.id)
-
-            if auth2.validate_otp(code):
-                return foo(request, *args, **kwargs)
-
-        return Auth2View().get(request, foo=foo, *args, **kwargs)
-
-    return wrapper
-
-
-class Auth2View(View):
-    _store = {}
-
-    def get(self, request, *args, foo=None, **kwargs):
-        # form with code
-        # generate key
-        # self._store[key] = (request, foo)
-
-        return HttpResponse('2fa required') # + key
-
-    def post(self, request, *args, **kwargs):
-        # get key from request
-        # get code from request
-        # self._store[key] -> original req, foo
-        # check is code valid
-        # return foo(original req)
-        return HttpResponse('2fa acquired')
 
 
 class ProductsView(View):

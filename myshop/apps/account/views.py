@@ -1,14 +1,90 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django import forms
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.contrib.messages.storage import default_storage
 
 from apps.account.models import RegTry, UserTwoFactorAuthData
 from apps.account.forms import RegTryForm, ValidateRegTryForm, LoginForm
 from apps.account.tasks import send_email_task, process_registration_task
+
+
+def auth2required(foo):
+    def wrapper(request, *args, **kwargs):
+        return Auth2View().get(request, target_view=foo, *args, **kwargs)
+
+    return wrapper
+
+
+class Form(forms.Form):
+    code = forms.CharField(required=True)
+
+    def clean_code(self):
+        value = str(self.cleaned_data['code']).strip()
+
+        if len(value) < 6 or not value.isdigit():
+            raise forms.ValidationError('Should be 6 digits!', 'invalid')
+        return value
+
+
+class Auth2View(View):
+    _store = {}
+    template_name = "auth2code.html"
+
+    @method_decorator(login_required)
+    def get(self, request, *args, target_view=None, **kwargs):
+
+        self._store[request.user.id] = {
+            'request': request,
+            'args': args,
+            'kwargs': kwargs,
+            'target_view': target_view,
+        }
+        context = {
+            'form': Form(),
+            'next': reverse('auth2confirm'),
+        }
+        messages.add_message(request, messages.ERROR, "2FA required!")
+        response = render(request, self.template_name, context=context)
+        return response
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+
+        form = Form(request.POST)
+        context = {
+            'form': form,
+            'next': reverse('auth2confirm'),
+        }
+
+        if not form.is_valid():
+            return render(request, self.template_name, context=context)
+
+        auth2fa_data = self._store.get(request.user.id)
+        if not auth2fa_data:
+            return redirect(reverse('home'))
+
+        auth2fa_obj = UserTwoFactorAuthData.objects.get(user_id=request.user.id)
+
+        if not auth2fa_obj.validate_otp(form['code'].value()):
+            form.add_error('code', forms.ValidationError('Invalid 2fa code, try again.', 'invalid'))
+            return render(request, self.template_name, context=context)
+
+        old_request = auth2fa_data['request']
+        target_view = auth2fa_data['target_view']
+        args = auth2fa_data['args']
+        kwargs = auth2fa_data['kwargs']
+
+        old_request._messages = default_storage(old_request)
+        messages.add_message(old_request, messages.SUCCESS, "2FA passed!")
+
+        return target_view(old_request, *args, *kwargs)
 
 
 class RegTryView(View):

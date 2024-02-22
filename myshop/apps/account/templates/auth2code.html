@@ -1,0 +1,25 @@
+{% extends "admin/login.html" %}
+
+{% block content %}
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+            <p class="errornote">
+                {{ error }}
+            </p>
+        {% endfor %}
+    {% endif %}
+
+    <form action="{{ next }}" method="post">
+        {% csrf_token %}
+
+        <div class="form-row">
+            {{ form.code.errors }}
+            {{ form.code }}
+
+        </div>
+
+        <div class="submit-row">
+            <input type="submit" value="Submit">
+        </div>
+    </form>
+{% endblock %}

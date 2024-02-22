@@ -66,7 +66,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'myshop.custom_middleware.Custom2fAMiddleware',
 ]
 
 ROOT_URLCONF = 'myshop.urls'
