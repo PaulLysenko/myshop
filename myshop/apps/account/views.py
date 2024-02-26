@@ -1,35 +1,42 @@
+from uuid import uuid4
+
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib import messages
+from django.contrib.messages.storage import default_storage
 from django import forms
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from django.contrib.messages.storage import default_storage
 
 from apps.account.models import RegTry, UserTwoFactorAuthData
 from apps.account.forms import RegTryForm, ValidateRegTryForm, LoginForm
 from apps.account.tasks import send_email_task, process_registration_task
 
 
-def auth2required(foo):
+def auth2required(view_method):
+
     def wrapper(request, *args, **kwargs):
-        return Auth2View().get(request, target_view=foo, *args, **kwargs)
+        # todo: login required here
+        # todo: if not 2fa on user -> setup 2fa
+        return Auth2View().preform_auth_2(request, target_view_method=view_method, *args, **kwargs)
 
     return wrapper
 
 
 class Form(forms.Form):
     code = forms.CharField(required=True)
+    token = forms.CharField(required=True, widget=forms.HiddenInput())
 
     def clean_code(self):
         value = str(self.cleaned_data['code']).strip()
 
         if len(value) < 6 or not value.isdigit():
             raise forms.ValidationError('Should be 6 digits!', 'invalid')
+
         return value
 
 
@@ -37,17 +44,18 @@ class Auth2View(View):
     _store = {}
     template_name = "auth2code.html"
 
-    @method_decorator(login_required)
-    def get(self, request, *args, target_view=None, **kwargs):
-
+    def preform_auth_2(self, request, *args, target_view_method=None, **kwargs):
+        token = str(uuid4())
         self._store[request.user.id] = {
-            'request': request,
-            'args': args,
-            'kwargs': kwargs,
-            'target_view': target_view,
+            token: {
+                'request': request,
+                'args': args,
+                'kwargs': kwargs,
+                'target_view_method': target_view_method,
+            },
         }
         context = {
-            'form': Form(),
+            'form': Form({'token': token}),
             'next': reverse('auth2confirm'),
         }
         messages.add_message(request, messages.ERROR, "2FA required!")
@@ -66,25 +74,33 @@ class Auth2View(View):
         if not form.is_valid():
             return render(request, self.template_name, context=context)
 
-        auth2fa_data = self._store.get(request.user.id)
-        if not auth2fa_data:
+        auth2fa_data = self._store.get(request.user.id, {})
+
+        if not auth2fa_data or (token := form['token'].value()) not in auth2fa_data:
             return redirect(reverse('home'))
 
+        # cache here
         auth2fa_obj = UserTwoFactorAuthData.objects.get(user_id=request.user.id)
 
         if not auth2fa_obj.validate_otp(form['code'].value()):
+            # todo: improve 3 attempts
+            # after 3-rd alert message, drop 2fa token
+            # redirect home
             form.add_error('code', forms.ValidationError('Invalid 2fa code, try again.', 'invalid'))
             return render(request, self.template_name, context=context)
 
+        self._store.pop(request.user.id)
+        auth2fa_data = auth2fa_data[token]
+
         old_request = auth2fa_data['request']
-        target_view = auth2fa_data['target_view']
+        target_view_method = auth2fa_data['target_view_method']
         args = auth2fa_data['args']
         kwargs = auth2fa_data['kwargs']
 
         old_request._messages = default_storage(old_request)
         messages.add_message(old_request, messages.SUCCESS, "2FA passed!")
 
-        return target_view(old_request, *args, *kwargs)
+        return target_view_method(old_request, *args, *kwargs)
 
 
 class RegTryView(View):
@@ -205,4 +221,3 @@ class SetupTwoFactorAuthView(TemplateView):
             )
 
         return self.render_to_response(context)
-
