@@ -85,7 +85,7 @@ class Auth2View(View):
         if not auth2fa_obj.validate_otp(form['code'].value()):
             # todo: improve 3 attempts
             # after 3-rd alert message, drop 2fa token
-            # redirect home
+            # logout
             form.add_error('code', forms.ValidationError('Invalid 2fa code, try again.', 'invalid'))
             return render(request, self.template_name, context=context)
 
