@@ -11,6 +11,8 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseRedirect
+
 
 from apps.account.models import RegTry, UserTwoFactorAuthData
 from apps.account.forms import RegTryForm, ValidateRegTryForm, LoginForm
@@ -20,8 +22,14 @@ from apps.account.tasks import send_email_task, process_registration_task
 def auth2required(view_method):
 
     def wrapper(request, *args, **kwargs):
-        # todo: login required here
-        # todo: if not 2fa on user -> setup 2fa
+        if not request.user.is_authenticated:
+            login_url = reverse('registration_try')
+            return HttpResponseRedirect(login_url)
+
+        if not request.user.gauth_secret:
+            too_fa_url = reverse('auth2confirm')
+            return HttpResponseRedirect(too_fa_url)
+
         return Auth2View().preform_auth_2(request, target_view_method=view_method, *args, **kwargs)
 
     return wrapper
@@ -64,7 +72,6 @@ class Auth2View(View):
 
     @method_decorator(login_required)
     def post(self, request, *args, **kwargs):
-
         form = Form(request.POST)
         context = {
             'form': form,
@@ -75,19 +82,30 @@ class Auth2View(View):
             return render(request, self.template_name, context=context)
 
         auth2fa_data = self._store.get(request.user.id, {})
+        attempts_left = request.session.get('auth2fa_attempts', 3)
 
         if not auth2fa_data or (token := form['token'].value()) not in auth2fa_data:
             return redirect(reverse('home'))
 
-        # cache here
         auth2fa_obj = UserTwoFactorAuthData.objects.get(user_id=request.user.id)
 
         if not auth2fa_obj.validate_otp(form['code'].value()):
-            # todo: improve 3 attempts
-            # after 3-rd alert message, drop 2fa token
-            # logout
-            form.add_error('code', forms.ValidationError('Invalid 2fa code, try again.', 'invalid'))
+            attempts_left -= 1
+            request.session['auth2fa_attempts'] = attempts_left
+
+            if attempts_left == 0:
+                del self._store[request.user.id]
+                auth2fa_obj.delete()
+                messages.error(request,
+                               'You have exceeded the maximum number of attempts. Two-factor authentication is disabled.')
+                logout(request)
+                return redirect(reverse('login'))
+
+            form.add_error('code',
+                           forms.ValidationError(f'Invalid 2fa code. {attempts_left} attempts left.', 'invalid'))
             return render(request, self.template_name, context=context)
+
+        request.session['auth2fa_attempts'] = 3
 
         self._store.pop(request.user.id)
         auth2fa_data = auth2fa_data[token]
@@ -100,8 +118,7 @@ class Auth2View(View):
         old_request._messages = default_storage(old_request)
         messages.add_message(old_request, messages.SUCCESS, "2FA passed!")
 
-        return target_view_method(old_request, *args, *kwargs)
-
+        return target_view_method(old_request, *args, **kwargs)
 
 class RegTryView(View):
     template_name = 'registration_try.html'
