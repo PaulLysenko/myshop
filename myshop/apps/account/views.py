@@ -12,6 +12,7 @@ from django.views import View
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect, get_object_or_404
 
+from apps.account.constants import MAX_ATTEMPTS_NUMBER
 from apps.account.models import RegTry, UserTwoFactorAuthData
 from apps.account.forms import RegTryForm, ValidateRegTryForm, LoginForm
 from apps.account.tasks import send_email_task, process_registration_task
@@ -20,13 +21,14 @@ from apps.account.tasks import send_email_task, process_registration_task
 def auth2required(view_method):
     @login_required(login_url="/registration/login/")
     def wrapper(request, *args, **kwargs):
-        # if not hasattr(request.user, 'two_factor_auth'):
-        try:
-            request.user.two_factor_auth
-            return Auth2View().preform_auth_2(request, target_view_method=view_method, *args, **kwargs)
-        except Exception as e: #request.user.two_factor_auth.RelatedObjectDoesNotExist help
+        if not hasattr(request.user, 'two_factor_auth'):
             messages.add_message(request, messages.ERROR, "Set up 2FA!")
             return redirect(reverse('setup-two-factor'))
+        try:
+            return Auth2View().preform_auth_2(request, target_view_method=view_method, *args, **kwargs)
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, f"{repr(e)}!")
+            return redirect(reverse('home'))
 
     return wrapper
 
@@ -47,7 +49,6 @@ class Form(forms.Form):
 class Auth2View(View):
     _store = {}
     template_name = "auth2code.html"
-    attempts = 3  # drop it
 
     def preform_auth_2(self, request, *args, target_view_method=None, **kwargs):
         token = str(uuid4())
@@ -57,7 +58,7 @@ class Auth2View(View):
                 'args': args,
                 'kwargs': kwargs,
                 'target_view_method': target_view_method,
-                'attempts': 3  # MAX_ATTEMPTS
+                'attempts': MAX_ATTEMPTS_NUMBER,
             },
         }
         context = {
@@ -89,10 +90,9 @@ class Auth2View(View):
         auth2fa_obj = UserTwoFactorAuthData.objects.get(user_id=request.user.id)
 
         if not auth2fa_obj.validate_otp(form['code'].value()):
-            self.attempts = auth2fa_data[token]['attempts']  # get it from auth2fa_obj
-            if self.attempts > 0:
-                # auth2fa_data[token]['attempts'] -= 1
-                form.add_error('code', forms.ValidationError(f'Invalid 2fa code! You have {self.attempts} attempts left.', 'invalid'))
+            if auth2fa_data[token]['attempts'] > 0:
+                form.add_error('code', forms.ValidationError(f'Invalid 2fa code! You have {auth2fa_data[token]["attempts"]} attempts left.', 'invalid'))
+                auth2fa_data[token]['attempts'] -= 1
                 return render(request, self.template_name, context=context)
             else:
                 messages.add_message(request, messages.ERROR, "No more attempts left!")
@@ -220,7 +220,7 @@ class LogoutView(View):
 class SetupTwoFactorAuthView(TemplateView):
     template_name = "setup_2fa.html"
 
-    @method_decorator(login_required(login_url='/registration/login/')) #why?
+    @method_decorator(login_required(login_url='/registration/login/'))
     def post(self, request):
         context = {}
         user = request.user
