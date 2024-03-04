@@ -22,10 +22,10 @@
   <h1 class="text-center" style="font-style: italic">Login</h1>
   <div class="input-group">
     <form method="post" action="{% url 'auth-login' %}">
-    {# login url here #}
       {% csrf_token %}
       <div class="form-outline" data-mdb-input-init>
         {{ form.as_p }}
+        <input type="hidden" name="next" value="{{ request.GET.next }}" />
         <div class="error-text" id="email_error"></div>
       </div>
       <input class="btn btn-primary" type="submit" value="Login">

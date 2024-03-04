@@ -12,17 +12,23 @@ from django.views import View
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect, get_object_or_404
 
+from apps.account.constants import MAX_ATTEMPTS_NUMBER
 from apps.account.models import RegTry, UserTwoFactorAuthData
 from apps.account.forms import RegTryForm, ValidateRegTryForm, LoginForm
 from apps.account.tasks import send_email_task, process_registration_task
 
 
 def auth2required(view_method):
-
+    @login_required(login_url="/registration/login/")
     def wrapper(request, *args, **kwargs):
-        # todo: login required here
-        # todo: if not 2fa on user -> setup 2fa
-        return Auth2View().preform_auth_2(request, target_view_method=view_method, *args, **kwargs)
+        if not hasattr(request.user, 'two_factor_auth'):
+            messages.add_message(request, messages.ERROR, "Set up 2FA!")
+            return redirect(reverse('setup-two-factor'))
+        try:
+            return Auth2View().preform_auth_2(request, target_view_method=view_method, *args, **kwargs)
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, f"{repr(e)}!")
+            return redirect(reverse('home'))
 
     return wrapper
 
@@ -52,6 +58,7 @@ class Auth2View(View):
                 'args': args,
                 'kwargs': kwargs,
                 'target_view_method': target_view_method,
+                'attempts': MAX_ATTEMPTS_NUMBER,
             },
         }
         context = {
@@ -62,7 +69,7 @@ class Auth2View(View):
         response = render(request, self.template_name, context=context)
         return response
 
-    @method_decorator(login_required)
+    @method_decorator(login_required(login_url="/registration/login/"))
     def post(self, request, *args, **kwargs):
 
         form = Form(request.POST)
@@ -83,24 +90,27 @@ class Auth2View(View):
         auth2fa_obj = UserTwoFactorAuthData.objects.get(user_id=request.user.id)
 
         if not auth2fa_obj.validate_otp(form['code'].value()):
-            # todo: improve 3 attempts
-            # after 3-rd alert message, drop 2fa token
-            # logout
-            form.add_error('code', forms.ValidationError('Invalid 2fa code, try again.', 'invalid'))
-            return render(request, self.template_name, context=context)
+            if auth2fa_data[token]['attempts'] > 0:
+                form.add_error('code', forms.ValidationError(f'Invalid 2fa code! You have {auth2fa_data[token]["attempts"]} attempts left.', 'invalid'))
+                auth2fa_data[token]['attempts'] -= 1
+                return render(request, self.template_name, context=context)
+            else:
+                messages.add_message(request, messages.ERROR, "No more attempts left!")
+                self._store.pop(request.user.id)
+                # request.user.two_factor_auth.delete()
+                return redirect(reverse('auth-logout'))
 
         self._store.pop(request.user.id)
-        auth2fa_data = auth2fa_data[token]
 
-        old_request = auth2fa_data['request']
-        target_view_method = auth2fa_data['target_view_method']
-        args = auth2fa_data['args']
-        kwargs = auth2fa_data['kwargs']
+        old_request = auth2fa_data[token]['request']
+        target_view_method = auth2fa_data[token]['target_view_method']
+        args = auth2fa_data[token]['args']
+        kwargs = auth2fa_data[token]['kwargs']
 
         old_request._messages = default_storage(old_request)
         messages.add_message(old_request, messages.SUCCESS, "2FA passed!")
 
-        return target_view_method(old_request, *args, *kwargs)
+        return target_view_method(old_request, *args, **kwargs)
 
 
 class RegTryView(View):
@@ -191,6 +201,9 @@ class LoginView(View):
 
         login(request, user)
 
+        if request.POST.get('next'):
+            return redirect(request.POST.get('next'))
+
         return redirect(reverse('home'))
 
 
@@ -207,6 +220,7 @@ class LogoutView(View):
 class SetupTwoFactorAuthView(TemplateView):
     template_name = "setup_2fa.html"
 
+    @method_decorator(login_required(login_url='/registration/login/'))
     def post(self, request):
         context = {}
         user = request.user
@@ -219,5 +233,8 @@ class SetupTwoFactorAuthView(TemplateView):
             context["qr_code"] = user2fa_data.generate_qr_code(
                 name=user.email,
             )
+        else:
+            messages.add_message(request, messages.ERROR, "You already have 2FA!")
+            return redirect(reverse('home'))
 
         return self.render_to_response(context)
