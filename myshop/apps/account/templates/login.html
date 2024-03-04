@@ -26,6 +26,7 @@
       {% csrf_token %}
       <div class="form-outline" data-mdb-input-init>
         {{ form.as_p }}
+        <input type="hidden" name="next" value="{{ request.GET.next }}" />
         <div class="error-text" id="email_error"></div>
       </div>
       <input class="btn btn-primary" type="submit" value="Login">
