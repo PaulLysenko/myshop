@@ -23,11 +23,11 @@ def auth2required(view_method):
 
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
-            login_url = reverse('registration_try')
+            login_url = reverse('auth-login')
             return HttpResponseRedirect(login_url)
 
-        if not request.user.gauth_secret:
-            too_fa_url = reverse('auth2confirm')
+        if not request.user.two_factor_auth:
+            too_fa_url = reverse('setup-gauth')
             return HttpResponseRedirect(too_fa_url)
 
         return Auth2View().preform_auth_2(request, target_view_method=view_method, *args, **kwargs)
@@ -94,12 +94,11 @@ class Auth2View(View):
             request.session['auth2fa_attempts'] = attempts_left
 
             if attempts_left == 0:
-                del self._store[request.user.id]
-                auth2fa_obj.delete()
+                del auth2fa_data
                 messages.error(request,
                                'You have exceeded the maximum number of attempts. Two-factor authentication is disabled.')
                 logout(request)
-                return redirect(reverse('login'))
+                return redirect(reverse('auth-login'))
 
             form.add_error('code',
                            forms.ValidationError(f'Invalid 2fa code. {attempts_left} attempts left.', 'invalid'))
