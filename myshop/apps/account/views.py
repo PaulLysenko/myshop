@@ -12,7 +12,6 @@ from django.views import View
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect, get_object_or_404
 
-from apps.account.constants import MAX_ATTEMPTS_NUMBER
 from apps.account.models import RegTry, UserTwoFactorAuthData
 from apps.account.forms import RegTryForm, ValidateRegTryForm, LoginForm
 from apps.account.tasks import send_email_task, process_registration_task
@@ -50,7 +49,7 @@ class Auth2View(View):
     _store = {}
     template_name = "auth2code.html"
 
-    def preform_auth_2(self, request, *args, target_view_method=None, **kwargs):
+    def preform_auth_2(self, request, max_attempts=3, target_view_method=None, *args, **kwargs):
         token = str(uuid4())
         self._store[request.user.id] = {
             token: {
@@ -58,7 +57,7 @@ class Auth2View(View):
                 'args': args,
                 'kwargs': kwargs,
                 'target_view_method': target_view_method,
-                'attempts': MAX_ATTEMPTS_NUMBER,
+                'attempts': max_attempts,
             },
         }
         context = {
@@ -91,13 +90,14 @@ class Auth2View(View):
 
         if not auth2fa_obj.validate_otp(form['code'].value()):
             if auth2fa_data[token]['attempts'] > 0:
-                form.add_error('code', forms.ValidationError(f'Invalid 2fa code! You have {auth2fa_data[token]["attempts"]} attempts left.', 'invalid'))
+                form.add_error('code', forms.ValidationError(
+                    f'Invalid 2fa code! You have {auth2fa_data[token]["attempts"]} attempts left.',
+                    'invalid'))
                 auth2fa_data[token]['attempts'] -= 1
                 return render(request, self.template_name, context=context)
             else:
                 messages.add_message(request, messages.ERROR, "No more attempts left!")
                 self._store.pop(request.user.id)
-                # request.user.two_factor_auth.delete()
                 return redirect(reverse('auth-logout'))
 
         self._store.pop(request.user.id)
