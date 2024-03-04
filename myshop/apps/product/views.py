@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import render, redirect
@@ -17,13 +18,23 @@ from apps.product.forms import SearchForm
 class ProductsView(View):
     template_name = 'products.html'
 
+    # @method_decorator(cache_page(10 * 60))
     def get(self, request):
         if not request.user.is_authenticated:
             return redirect(reverse('auth-login'))
 
         form = SearchForm()
 
-        products = Product.objects.all()
+        key = request.session.session_key
+
+        products = cache.get(key, [])
+        if not products:
+            products = Product.objects.all()
+            cache.set(
+                key=key,
+                value=products,
+                timeout=5 * 60,
+            )
 
         context = {
             'products': products,

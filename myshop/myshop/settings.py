@@ -191,6 +191,21 @@ REST_FRAMEWORK = {
 }
 
 
+# Caches / Redis settings
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        # 'LOCATION': 'redis://db_redis:6379/1',
+        'LOCATION': 'redis://localhost:6379/1',     # need for work on local machine
+        'TIMEOUT': 300,  # default timeout for all cache in seconds
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'redis_cache',
+    },
+}
+
+
 if DEBUG:
     ALLOWED_HOSTS.extend([
         "*",

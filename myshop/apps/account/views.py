@@ -1,11 +1,13 @@
+import copy
 from uuid import uuid4
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.contrib.messages.storage import default_storage
+from django.core.cache import cache
 from django import forms
+from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -18,14 +20,21 @@ from apps.account.forms import RegTryForm, ValidateRegTryForm, LoginForm
 from apps.account.tasks import send_email_task, process_registration_task
 
 
+FUNCTION_MAPPING = {}
+
+
 def auth2required(view_method):
+
+    view_method_id = str(len(FUNCTION_MAPPING))
+    FUNCTION_MAPPING[view_method_id] = view_method
+
     @login_required(login_url="/registration/login/")
     def wrapper(request, *args, **kwargs):
         if not hasattr(request.user, 'two_factor_auth'):
             messages.add_message(request, messages.ERROR, "Set up 2FA!")
             return redirect(reverse('setup-two-factor'))
         try:
-            return Auth2View().preform_auth_2(request, target_view_method=view_method, *args, **kwargs)
+            return Auth2View().preform_auth_2(request, target_view_method_id=view_method_id, *args, **kwargs)
         except Exception as e:
             messages.add_message(request, messages.ERROR, f"{repr(e)}!")
             return redirect(reverse('home'))
@@ -46,26 +55,48 @@ class Form(forms.Form):
         return value
 
 
+def duplicate_request(request):
+    keys = ('wsgi.errors', 'wsgi.input')
+
+    for k in keys:
+        if k in request.META:
+            request.META.pop(k)
+
+    new_request = HttpRequest()
+
+    new_request.method = request.method
+    new_request.path = request.path
+    new_request.META = copy.deepcopy(request.META)
+    new_request.GET = copy.deepcopy(request.GET)
+    new_request.POST = copy.deepcopy(request.POST)
+
+    return new_request
+
+
 class Auth2View(View):
-    _store = {}
     template_name = "auth2code.html"
 
-    def preform_auth_2(self, request, *args, target_view_method=None, **kwargs):
+    def preform_auth_2(self, request, *args, target_view_method_id, **kwargs):
         token = str(uuid4())
-        self._store[request.user.id] = {
-            token: {
-                'request': request,
-                'args': args,
-                'kwargs': kwargs,
-                'target_view_method': target_view_method,
-                'attempts': MAX_ATTEMPTS_NUMBER,
+
+        cache.set(
+            key=request.user.id,
+            value={
+                token: {
+                    'request': duplicate_request(request),
+                    'args': args,
+                    'kwargs': kwargs,
+                    'target_view_method_id': target_view_method_id,
+                    'attempts': MAX_ATTEMPTS_NUMBER,
+                },
             },
-        }
+            timeout=5 * 60,  # 5 minutes
+        )
         context = {
             'form': Form({'token': token}),
             'next': reverse('auth2confirm'),
         }
-        messages.add_message(request, messages.ERROR, "2FA required!")
+
         response = render(request, self.template_name, context=context)
         return response
 
@@ -81,12 +112,12 @@ class Auth2View(View):
         if not form.is_valid():
             return render(request, self.template_name, context=context)
 
-        auth2fa_data = self._store.get(request.user.id, {})
+        auth2fa_data = cache.get(request.user.id, {})
 
         if not auth2fa_data or (token := form['token'].value()) not in auth2fa_data:
             return redirect(reverse('home'))
 
-        # cache here
+        # cache here ?
         auth2fa_obj = UserTwoFactorAuthData.objects.get(user_id=request.user.id)
 
         if not auth2fa_obj.validate_otp(form['code'].value()):
@@ -96,19 +127,13 @@ class Auth2View(View):
                 return render(request, self.template_name, context=context)
             else:
                 messages.add_message(request, messages.ERROR, "No more attempts left!")
-                self._store.pop(request.user.id)
-                # request.user.two_factor_auth.delete()
                 return redirect(reverse('auth-logout'))
 
-        self._store.pop(request.user.id)
 
         old_request = auth2fa_data[token]['request']
-        target_view_method = auth2fa_data[token]['target_view_method']
+        target_view_method = FUNCTION_MAPPING[auth2fa_data[token]['target_view_method_id']]
         args = auth2fa_data[token]['args']
         kwargs = auth2fa_data[token]['kwargs']
-
-        old_request._messages = default_storage(old_request)
-        messages.add_message(old_request, messages.SUCCESS, "2FA passed!")
 
         return target_view_method(old_request, *args, **kwargs)
 

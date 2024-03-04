@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.views import View
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from apps.cart.models import Cart, CartItem
 from apps.product.models import Product
@@ -22,12 +22,12 @@ class AddCartView(View):
     template = 'view_cart.html'
 
     def post(self, request, product_id):
+        product = get_object_or_404(Product, id=product_id)
+
         cart, _ = Cart.objects.get_or_create(
             user_id=request.user.id,
             finalizing_time__isnull=True,
         )
-
-        product = Product.objects.get(id=product_id)
 
         cart_item, created = CartItem.objects.get_or_create(
             product_id=product.id,
