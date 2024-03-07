@@ -1,7 +1,47 @@
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.db import models
 
-from apps.product.constants import FileImportStatus
+from apps.product.constants import (
+    FileImportStatus,
+    DEFAULT_PRODUCT_CACHE_TIME,
+    DEFAULT_PRODUCT_ALL_CACHE_KEY,
+)
+
+
+class CashedProductsManager(models.Manager):
+    def all(self):
+
+        qs = cache.get(
+            key=DEFAULT_PRODUCT_ALL_CACHE_KEY,
+            default=Product.objects.none(),
+        )
+        if not qs.exists():
+            qs = super().all()
+            cache.set(
+                key=DEFAULT_PRODUCT_ALL_CACHE_KEY,
+                value=qs,
+                timeout=DEFAULT_PRODUCT_CACHE_TIME,
+            )
+
+        return qs
+
+
+# class CashedProductsQuerySet(models.QuerySet):
+#     def cashed(self):
+#         qs = cache.get(
+#             key=DEFAULT_PRODUCT_ALL_CACHE_KEY,
+#             default=Product.objects.none(),
+#         )
+#         if not qs.exists():
+#             qs = super().all()
+#             cache.set(
+#                 key=DEFAULT_PRODUCT_ALL_CACHE_KEY,
+#                 value=qs,
+#                 timeout=DEFAULT_PRODUCT_CACHE_TIME,
+#             )
+#
+#         return qs
 
 
 class Brand(models.Model):
@@ -14,6 +54,10 @@ class Brand(models.Model):
 
 
 class Product(models.Model):
+    objects = models.Manager()
+    cashed_objects = CashedProductsManager()
+    # cashed_objects = CashedProductsQuerySet.as_manager()
+
     name = models.CharField(max_length=256, unique=True)
     price = models.DecimalField(max_digits=12, decimal_places=2)
     created_at = models.DateTimeField(auto_now=True, auto_created=True)

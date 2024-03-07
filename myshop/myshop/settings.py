@@ -98,8 +98,7 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        # 'HOST': 'db_postgres',
-        'HOST': 'localhost',  # for local project run
+        'HOST': 'db_postgres',
         'PORT': '5432',
     },
 }
@@ -195,8 +194,7 @@ REST_FRAMEWORK = {
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        # 'LOCATION': 'redis://db_redis:6379/1',
-        'LOCATION': 'redis://localhost:6379/1',     # need for work on local machine
+        'LOCATION': 'redis://db_redis:6379/1',
         'TIMEOUT': 300,  # default timeout for all cache in seconds
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',

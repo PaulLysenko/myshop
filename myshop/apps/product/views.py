@@ -9,8 +9,10 @@ from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.shortcuts import get_object_or_404
+from django.views.decorators.cache import cache_page
 
 from apps.account.views import auth2required
+from apps.product.constants import DEFAULT_PRODUCT_CACHE_TIME
 from apps.product.models import Product, Brand
 from apps.product.forms import SearchForm
 
@@ -25,19 +27,17 @@ class ProductsView(View):
 
         form = SearchForm()
 
-        key = request.session.session_key
-
-        products = cache.get(key, [])
-        if not products:
-            products = Product.objects.all()
-            cache.set(
-                key=key,
-                value=products,
-                timeout=5 * 60,
-            )
+        # key = request.session.session_key
+        # if not (products := cache.get(key, [])):
+        #     products = Product.objects.all()
+        #     cache.set(
+        #         key=key,
+        #         value=products,
+        #         timeout=DEFAULT_PRODUCT_CACHE_TIME,
+        #     )
 
         context = {
-            'products': products,
+            'products': Product.cashed_objects.all(),
             'form': form,
         }
         response = render(request, self.template_name, context=context)
