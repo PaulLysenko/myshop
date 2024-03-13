@@ -28,20 +28,20 @@ class ProductsView(View):
 
         form = SearchForm()
 
-        key = request.session.session_key
-        if not (products := cache.get(key, [])):
-            products = Product.objects.all()
-            cache.set(
-                key=key,
-                value=products,
-                timeout=DEFAULT_PRODUCT_CACHE_TIME,
-            )
-        products_paginator = Paginator(products, 2)
+        # key = request.session.session_key
+        # if not (products := cache.get(key, [])):
+        #     products = Product.objects.all()
+        #     cache.set(
+        #         key=key,
+        #         value=products,
+        #         timeout=DEFAULT_PRODUCT_CACHE_TIME,
+        #     )
+
+        products_paginator = Paginator(Product.cashed_objects.all(), 2)
         page = request.GET.get('page')
         pagination_products = products_paginator.get_page(page)
 
         context = {
-            # 'products': Product.cashed_objects.all(),
             'products': pagination_products,
             'form': form,
         }
