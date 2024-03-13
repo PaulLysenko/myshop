@@ -17,7 +17,7 @@ class CashedProductsManager(models.Manager):
             default=Product.objects.none(),
         )
         if not qs.exists():
-            qs = super().all()
+            qs = super().all().select_related('brand')
             cache.set(
                 key=DEFAULT_PRODUCT_ALL_CACHE_KEY,
                 value=qs,
