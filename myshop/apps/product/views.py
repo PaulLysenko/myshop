@@ -10,6 +10,7 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_page
+from django.core.paginator import Paginator
 
 from apps.account.views import auth2required
 from apps.product.constants import DEFAULT_PRODUCT_CACHE_TIME
@@ -27,17 +28,21 @@ class ProductsView(View):
 
         form = SearchForm()
 
-        # key = request.session.session_key
-        # if not (products := cache.get(key, [])):
-        #     products = Product.objects.all()
-        #     cache.set(
-        #         key=key,
-        #         value=products,
-        #         timeout=DEFAULT_PRODUCT_CACHE_TIME,
-        #     )
+        key = request.session.session_key
+        if not (products := cache.get(key, [])):
+            products = Product.objects.all()
+            cache.set(
+                key=key,
+                value=products,
+                timeout=DEFAULT_PRODUCT_CACHE_TIME,
+            )
+        products_paginator = Paginator(products, 2)
+        page = request.GET.get('page')
+        pagination_products = products_paginator.get_page(page)
 
         context = {
-            'products': Product.cashed_objects.all(),
+            # 'products': Product.cashed_objects.all(),
+            'products': pagination_products,
             'form': form,
         }
         response = render(request, self.template_name, context=context)
